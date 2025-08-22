@@ -1,0 +1,6 @@
+{
+	"luau-lsp.require.mode": "relativeToFile",
+	"luau-lsp.types.definitionFiles": ["globals.d.luau"],
+	"luau-lsp.platform.type": "standard",
+	"luau-lsp.sourcemap.enabled": false
+}
