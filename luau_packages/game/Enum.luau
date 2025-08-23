@@ -1,3 +1,6 @@
+
+export type StartupRatios = {X:number, Y:number}
+
 return {
     StartupRatios = {
         ["800x600"]   = {X = 800, Y = 600},     -- 4:3
