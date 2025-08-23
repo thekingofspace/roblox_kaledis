@@ -94,7 +94,7 @@ function module.CreateSignal()
         coroutine.yield()
 
         if result then
-            return table.unpack(result)
+            return unpack(result)
         end
         return nil
     end
@@ -103,12 +103,12 @@ function module.CreateSignal()
         local args = {...}
 
         if self.Constructor then
-            args = {self.Constructor(table.unpack(args))}
+            args = {self.Constructor(unpack(args))}
         end
 
         for _, connection in ipairs(AsyncConnections) do
             if connection.IsConnected then
-                coroutine.wrap(connection.Callback)(table.unpack(args))
+                coroutine.wrap(connection.Callback)(unpack(args))
             end
         end
 
@@ -117,14 +117,14 @@ function module.CreateSignal()
             table.clear(WaitingThreads)
             coroutine.wrap(function()
                 for _, resumeFn in ipairs(toResume) do
-                    resumeFn(table.unpack(args))
+                    resumeFn(unpack(args))
                 end
             end)()
         end
 
         for _, connection in ipairs(SyncConnections) do
             if connection.IsConnected then
-                connection.Callback(table.unpack(args))
+                connection.Callback(unpack(args))
             end
         end
 

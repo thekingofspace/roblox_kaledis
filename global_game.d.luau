@@ -46,3 +46,7 @@ export type HTTP_Service = {
 
     JsonDecode:(Str:string) -> any
 }
+
+export type RunService = {
+    RenderStep: ReadOnlySignal
+}
