@@ -40,3 +40,9 @@ export type ReadOnlySignal = {
     ConnectAsync: (self: ReadOnlySignal, callback: (...any) -> ()) -> Connection,
     Wait: (self: ReadOnlySignal, timeout: number?) -> (...any),
 }
+
+export type HTTP_Service = {
+    JsonEncode:(Data:any, Pretty:boolean) -> string;
+
+    JsonDecode:(Str:string) -> any
+}
