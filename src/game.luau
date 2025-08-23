@@ -1,4 +1,7 @@
-local module = {}
+local module = {
+    Workspace = "Workspace";
+    Storage = "Storage"
+}
 
 type Services = "HTTP_Service" | "RunService" | "Datastore"
 
@@ -18,15 +21,19 @@ local InitData = {
     Heartbeat = Signal.CreateSignal();
 }
 
-RunService.Init.Build(InitData.RenderStep, InitData.Heartbeat)
-
 local Services = {
     ["HTTP_Service"] = HTTP;
     ["RunService"] = RunService,
     ["Datastore"] = Datastore
 }
 
-function module.GetCommonElements()
+for I, item in pairs(Services) do
+    if item.Init.Build then
+        item.Init.Build(InitData)
+    end
+end
+
+function module:GetCommonElements()
     return Color4, Enum, Udim.UDim, Udim.UDim2, Task.module
 end
 
@@ -39,8 +46,9 @@ function module:GetService(Service:Services)
 end
 
 function love.load()
-   
+    
 end
+
 
 function love.update(dt)
     InitData.Heartbeat:Fire()
