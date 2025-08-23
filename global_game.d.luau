@@ -76,7 +76,9 @@ export type Instance = {
     ID:string;
 
     Destroy:(self:Instance) -> nil;
-    Draw:((self:Instance) -> nil)?
+    Draw:((self:Instance) -> nil)?,
+    SetAttribute:(self:Instance, Name:string, Value:any) -> nil,
+    GetAttribute:(self:Instance, Name:string) -> any
 }
 
 export type Frame = Instance & {

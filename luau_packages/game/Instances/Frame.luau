@@ -23,6 +23,7 @@ local PropertyTypes = {
     ClassName = "frozen",
     Changed = "frozen",
     ID = "frozen",
+    attributes = "table",
     Parent = {"nil", "string"},
     Visible = "boolean"
 }
@@ -50,6 +51,7 @@ function module.new(InstanceUpdate: Signal, GetID: () -> string)
         ClassName = "Class",
         Changed = Signal.CreateReadOnlySignal(Changed),
         ID = UID,
+        attributes = {},
         Parent = "nil",
         Visible = true
     }
