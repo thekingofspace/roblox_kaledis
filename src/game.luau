@@ -1,6 +1,6 @@
 local module = {}
 
-type Services = "HTTP_Service" | "RunService"
+type Services = "HTTP_Service" | "RunService" | "Datastore"
 
 local Enum = require("@game/Enum")
 local Signal = require("@game/signal")
@@ -11,6 +11,7 @@ local Task = require("@game/BuiltIn/Task")
 
 local HTTP = require("@game/Services/HTTP")
 local RunService = require("@game/Services/RunService")
+local Datastore = require("@game/Services/DataStore")
 
 local InitData = {
     RenderStep = Signal.CreateSignal();
@@ -21,7 +22,8 @@ RunService.Init.Build(InitData.RenderStep, InitData.Heartbeat)
 
 local Services = {
     ["HTTP_Service"] = HTTP;
-    ["RunService"] = RunService
+    ["RunService"] = RunService,
+    ["Datastore"] = Datastore
 }
 
 function module.GetCommonElements()

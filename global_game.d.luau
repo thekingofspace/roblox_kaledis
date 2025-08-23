@@ -51,3 +51,16 @@ export type RunService = {
     RenderStep: ReadOnlySignal;
     Heartbeat:ReadOnlySignal
 }
+
+export type DatastoreService = {
+    GetDataStore: (self: DatastoreService, name: string) -> Datastore,
+}
+
+export type Datastore = {
+    name: string,
+    GetAsync: (self: Datastore, key: string) -> any?,
+    SetAsync: (self: Datastore, key: string, value: any) -> (boolean, string?),
+    UpdateAsync: (self: Datastore, key: string, updateFunc: (currentValue: any?) -> any) -> (boolean, string?),
+    RemoveAsync: (self: Datastore, key: string) -> (boolean, string?),
+    ListAsync: (self: Datastore) -> {[string]: any?},
+}
