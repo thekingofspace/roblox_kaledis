@@ -1,7 +1,7 @@
 local Color = {}
 Color.__index = Color
 
-function Color.new(r, g, b, a)
+function Color.new(r, g, b, a):Color4
     local self = setmetatable({}, Color)
 
     if type(r) == "string" then
@@ -28,7 +28,7 @@ function Color:toLove()
     return self.r, self.g, self.b, self.a
 end
 
-function Color:mix(other, t)
+function Color:mix(other, t):Color4
     t = t or 0.5
     local r = self.r*(1-t) + other.r*t
     local g = self.g*(1-t) + other.g*t
@@ -37,7 +37,7 @@ function Color:mix(other, t)
     return Color.new(r*255, g*255, b*255, a*255)
 end
 
-function Color:darken(factor)
+function Color:darken(factor):Color4
     factor = factor or 0.2
     return Color.new(
         (self.r*(1-factor))*255,
@@ -47,7 +47,7 @@ function Color:darken(factor)
     )
 end
 
-function Color:lighten(factor)
+function Color:lighten(factor):Color4
     factor = factor or 0.2
     return Color.new(
         math.min(self.r + factor, 1)*255,

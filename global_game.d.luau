@@ -68,3 +68,19 @@ export type Datastore = {
     RemoveAsync: (self: Datastore, key: string) -> (boolean, string?),
     ListAsync: (self: Datastore) -> {[string]: any?},
 }
+
+export type Instance = {
+    Name:string;
+    ClassName:string;
+    Changed:Signal;
+    ID:string;
+
+    Destroy:(self:Instance) -> nil;
+    Draw:((self:Instance) -> nil)?
+}
+
+export type Frame = Instance & {
+    Parent: string?,
+    Visible:boolean
+    
+}

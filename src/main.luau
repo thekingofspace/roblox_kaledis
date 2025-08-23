@@ -1,7 +1,10 @@
 local game = require("./game")
-local RunService:RunService = game:GetService("RunService")
-local DataStore:DatastoreService = game:GetService("Datastore")
-local Encoder:Encode_Service = game:GetService("HTTP_Service")
-local Section:Datastore = DataStore:GetDataStore("Test")
+local Color4, Enum, UDim, UDim2, task, Instance = game:GetCommonElements()
 
-local Color4, Enum, UDim, UDim2, task = game:GetCommonElements()
+local Frame:Frame = Instance.new("Frame")
+
+task.spawn(function()
+    task.wait(5)
+
+    
+end)
