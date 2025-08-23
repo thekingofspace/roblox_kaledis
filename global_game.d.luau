@@ -77,12 +77,19 @@ export type Instance = {
 
     Destroy:(self:Instance) -> nil;
     Draw:((self:Instance) -> nil)?,
+    Clone:(self:Instance) -> any,
     SetAttribute:(self:Instance, Name:string, Value:any) -> nil,
     GetAttribute:(self:Instance, Name:string) -> any
 }
 
 export type Frame = Instance & {
     Parent: string?,
-    Visible:boolean
-    
+    Visible:boolean;
+    Size:UDim2;
+    Position:UDim2;
+    Position:UDim2;
+    Anchorpoint:UDim2;
+    Color:Color4;
+    Rotation:number;
+    ZIndex:number
 }

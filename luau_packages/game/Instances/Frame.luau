@@ -1,6 +1,8 @@
 local module = {}
 local Inherited = require("@game/Instances/Inherited")
 local Signal = require("@game/signal")
+local Udim = require("@game/PropertyTypes/Udim")
+local Color4 = require("@game/PropertyTypes/Color4")
 
 local function CheckType(ID: string, Value, Properties)
     if Properties[ID] == "frozen" then
@@ -25,7 +27,13 @@ local PropertyTypes = {
     ID = "frozen",
     attributes = "table",
     Parent = {"nil", "string"},
-    Visible = "boolean"
+    Visible = "boolean",
+    Size = "table";
+    Position = "table";
+    Anchorpoint = "table";
+    Color = "table";
+    Rotation = "number";
+    ZIndex = "number"
 }
 
 local PropertyTransform = {
@@ -53,7 +61,13 @@ function module.new(InstanceUpdate: Signal, GetID: () -> string)
         ID = UID,
         attributes = {},
         Parent = "nil",
-        Visible = true
+        Visible = true;
+        Size = Udim.UDim2.new(0, 100, 0, 100);
+        Position = Udim.UDim2.new(0, 0, 0, 0);
+        Anchorpoint = Udim.UDim2.new(0.5, 0, 0.5, 0);
+        Color = Color4.new("#ffffff");
+        Rotation = 0;
+        ZIndex = 0
     }
 
     local RawMethods = {}
@@ -61,11 +75,24 @@ function module.new(InstanceUpdate: Signal, GetID: () -> string)
         RawMethods[k] = v
     end
 
-    RawMethods.Draw = function()
-        if RawProperties.Parent == "Workspace" and RawProperties.Visible == true then
-            
-        end
+    RawMethods.Draw = function(self)
+    if RawProperties.Parent == "Workspace" and RawProperties.Visible == true then
+        local px, py = RawProperties.Position:ToAbsolute(love.graphics.getWidth(), love.graphics.getHeight())
+        local sx, sy = RawProperties.Size:ToAbsolute(love.graphics.getWidth(), love.graphics.getHeight())
+        local ax, ay = RawProperties.Anchorpoint:ToAbsolute(sx, sy)
+
+        local r, g, b, a = RawProperties.Color:toLove()
+
+        love.graphics.push()
+        love.graphics.translate(px, py)
+        love.graphics.rotate(math.rad(RawProperties.Rotation))
+        love.graphics.setColor(r, g, b, a)
+
+        love.graphics.rectangle("fill", -ax, -ay, sx, sy)
+
+        love.graphics.pop()
     end
+end
 
     RawMethods.Destroy = function(self)
         InstanceUpdate:Fire(UID, "Destroy", self)
@@ -73,6 +100,18 @@ function module.new(InstanceUpdate: Signal, GetID: () -> string)
         table.clear(RawMethods)
         Changed = nil
         UID = nil
+    end
+
+    RawMethods.Clone = function(self)
+        local clone = module.new(InstanceUpdate, GetID)
+
+        for k, v in pairs(RawProperties) do
+            if PropertyTypes[k] ~= "frozen" then
+                clone[k] = v
+            end
+        end
+
+        return clone
     end
 
     local self = {}

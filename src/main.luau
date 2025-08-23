@@ -1,9 +1,44 @@
 local game = require("./game")
-local Color4, Enum, UDim, UDim2, task, Instance = game:GetCommonElements()
+local RunService:RunService = game:GetService("RunService")
+local Color4, _Enum, _UDim, UDim2, _task, Instance = game:GetCommonElements()
 
 local Frame:Frame = Instance.new("Frame")
 
-task.spawn(function()
-    Frame:SetAttribute("Test", true)
-    print(Frame:GetAttribute("Test"))
+Frame.Size = UDim2.new(0.5, 0, 0.5, 0)
+
+Frame.Anchorpoint = UDim2.new(0.5, 0, 0.5, 0)
+
+Frame.Parent = game.Workspace
+
+Frame.Visible = true
+
+Frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+
+Frame.Color = Color4.new("#885be3")
+
+local NewFrame:Frame = Frame:Clone()
+
+NewFrame.Color = Color4.new("#e81818")
+
+NewFrame.Size = UDim2.new(0.3, 0, 0.3, 0)
+
+NewFrame.ZIndex = 1
+
+local direction = 1
+local speed = 0.2
+
+
+RunService.RenderStep:Connect(function(DT)
+    local newX = NewFrame.Size.X.Scale + speed * direction * DT
+    local newY = NewFrame.Size.Y.Scale + speed * direction * DT
+
+    if newX >= 1 then
+        newX = 1
+        direction = -1
+    elseif newX <= 0 then
+        newX = 0
+        direction = 1
+    end
+
+    NewFrame.Size = UDim2.new(newX, 0, newY, 0)
 end)

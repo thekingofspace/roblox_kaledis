@@ -57,6 +57,18 @@ function module.new(InstanceUpdate:Signal, GetID:() -> string)
         
     end
 
+    RawMethods.Clone = function(self)
+        local clone = module.new(InstanceUpdate, GetID)
+
+        for k, v in pairs(RawProperties) do
+            if PropertyTypes[k] ~= "frozen" then
+                clone[k] = v
+            end
+        end
+
+        return clone
+    end
+
     RawMethods.Destroy = function(self)
         InstanceUpdate:Fire(UID, "Destroy", self)
         table.clear(RawProperties)

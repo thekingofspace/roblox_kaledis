@@ -84,14 +84,44 @@ function love.update(dt)
     Task.Init.heartbeat(dt)
 end
 
-function love.draw(dt)
+local lastTime = love.timer.getTime()
+
+function love.draw()
+    local currentTime = love.timer.getTime()
+    local dt = currentTime - lastTime
+    lastTime = currentTime
+
     InitData.RenderStep:Fire(dt)
-    for I, item in pairs(Instances) do
+
+    local normal = {}
+    local layered = {}
+    
+    for _, item in pairs(Instances) do
+        if item.ZIndex ~= nil then
+            table.insert(layered, item)
+        else
+            table.insert(normal, item)
+        end
+    end
+
+    table.sort(layered, function(a, b)
+        return a.ZIndex < b.ZIndex
+    end)
+
+    for _, item in ipairs(layered) do
+        if item.Draw then
+            item:Draw()
+        end
+    end
+
+    for _, item in ipairs(normal) do
         if item.Draw then
             item:Draw()
         end
     end
 end
+
+
 
 InitData.InstanceUpdate:Connect(function(ID:string, Type:string, Instance)
     Switch({
