@@ -14,7 +14,7 @@ local Udim = require("@game/PropertyTypes/Udim")
 
 local Task = require("@game/BuiltIn/Task")
 
-local HTTP = require("@game/Services/HTTP")
+local HTTP = require("@game/Services./EncodeService")
 local RunService = require("@game/Services/RunService")
 local Datastore = require("@game/Services/DataStore")
 

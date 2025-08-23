@@ -1,5 +1,5 @@
 
-export type StartupRatios = {X:number, Y:number}
+-- when adding new new enums you likely will need to update the global_game.d.luau in order to add type checking to them.
 
 return {
     StartupRatios = {

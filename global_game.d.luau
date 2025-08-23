@@ -41,10 +41,14 @@ export type ReadOnlySignal = {
     Wait: (self: ReadOnlySignal, timeout: number?) -> (...any),
 }
 
-export type HTTP_Service = {
+export type Encode_Service = {
     JsonEncode:(Data:any, Pretty:boolean) -> string;
 
-    JsonDecode:(Str:string) -> any
+    JsonDecode:(Str:string) -> any;
+
+    TomlEncode:(Data:any) -> string;
+
+    TomlDecode:(Str:string) -> any
 }
 
 export type RunService = {
