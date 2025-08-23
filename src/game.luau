@@ -1,7 +1,9 @@
 local module = {
     Workspace = "Workspace";
-    Storage = "Storage"
 }
+
+local Workspace = {}
+
 
 type Services = "HTTP_Service" | "RunService" | "Datastore"
 
@@ -19,6 +21,7 @@ local Datastore = require("@game/Services/DataStore")
 local InitData = {
     RenderStep = Signal.CreateSignal();
     Heartbeat = Signal.CreateSignal();
+    InstanceUpdate = Signal.CreateSignal()
 }
 
 local Services = {
