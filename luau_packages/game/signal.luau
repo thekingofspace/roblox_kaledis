@@ -64,6 +64,10 @@ function module.CreateSignal()
         local fired = false
         local result
 
+        if not thread then
+            error("Wait cannot be used outside of a coroutine/thread")
+        end
+
         local function continue(...)
             if fired then return end
             fired = true

@@ -48,5 +48,6 @@ export type HTTP_Service = {
 }
 
 export type RunService = {
-    RenderStep: ReadOnlySignal
+    RenderStep: ReadOnlySignal;
+    Heartbeat:ReadOnlySignal
 }

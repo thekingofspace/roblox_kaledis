@@ -7,14 +7,17 @@ local Signal = require("@game/signal")
 local Color4 = require("@game/PropertyTypes/Color4")
 local Udim = require("@game/PropertyTypes/Udim")
 
+local Task = require("@game/BuiltIn/Task")
+
 local HTTP = require("@game/Services/HTTP")
 local RunService = require("@game/Services/RunService")
 
 local InitData = {
-    RenderStep = Signal.CreateSignal()
+    RenderStep = Signal.CreateSignal();
+    Heartbeat = Signal.CreateSignal();
 }
 
-RunService.Init.Build(InitData.RenderStep)
+RunService.Init.Build(InitData.RenderStep, InitData.Heartbeat)
 
 local Services = {
     ["HTTP_Service"] = HTTP;
@@ -22,7 +25,7 @@ local Services = {
 }
 
 function module.GetCommonElements()
-    return Color4, Enum, Udim.UDim, Udim.UDim2
+    return Color4, Enum, Udim.UDim, Udim.UDim2, Task.module
 end
 
 function module:GetService(Service:Services)
@@ -33,13 +36,13 @@ function module:GetService(Service:Services)
     end
 end
 
--- Love2D callbacks
 function love.load()
    
 end
 
-function love.update()
-    
+function love.update(dt)
+    InitData.Heartbeat:Fire()
+    Task.Init.heartbeat(dt)
 end
 
 function love.draw(dt)
