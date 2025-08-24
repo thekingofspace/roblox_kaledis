@@ -2,6 +2,23 @@ local game = require("./game")
 local RunService:RunService = game:GetService("RunService")
 local Color4, _Enum, _UDim, UDim2, _task, Instance = game:GetCommonElements()
 
+local Settings:SettingsService = game:GetService("Settings")
+
+local Config = Settings.new()
+
+local Values = {
+    ["Volume"] = {
+        ["Music Level"] = 50
+    }
+}
+
+for I, item in pairs(Values) do
+    for E, Value in pairs(item) do
+        Config:Set(I, E, Config:Get(I, E) or Value)
+    end
+end
+
+
 local Frame:Frame = Instance.new("Frame")
 
 Frame.Size = UDim2.new(0.5, 0, 0.5, 0)

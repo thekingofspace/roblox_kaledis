@@ -2,7 +2,7 @@ local module = {
     Workspace = "Workspace";
 }
 
-type Services = "HTTP_Service" | "RunService" | "Datastore"
+type Services = "HTTP_Service" | "RunService" | "Datastore" | "Settings"
 
 local Enum = require("@game/Enum")
 local Signal = require("@game/signal")
@@ -11,11 +11,12 @@ local Udim = require("@game/PropertyTypes/Udim")
 
 local Task = require("@game/BuiltIn/Task")
 local Instance = require("@game/BuiltIn/Instance")
+local Switch = require("@game/Vendors/Switch")
 
 local HTTP = require("@game/Services./EncodeService")
 local RunService = require("@game/Services/RunService")
 local Datastore = require("@game/Services/DataStore")
-local Switch = require("@game/Vendors/Switch")
+local Settings = require("@game/Services/Settings")
 
 local InitData = {
     RenderStep = Signal.CreateSignal();
@@ -26,7 +27,8 @@ local InitData = {
 local Services = {
     ["HTTP_Service"] = HTTP;
     ["RunService"] = RunService,
-    ["Datastore"] = Datastore
+    ["Datastore"] = Datastore,
+    ["Settings"] = Settings
 }
 
 for I, item in pairs(Services) do
@@ -73,6 +75,7 @@ function module:GetService(Service:Services)
 end
 
 local Instances = {}
+local Drawables = {}
 
 function love.load()
     
@@ -96,7 +99,7 @@ function love.draw()
     local normal = {}
     local layered = {}
     
-    for _, item in pairs(Instances) do
+    for _, item in pairs(Drawables) do
         if item.ZIndex ~= nil then
             table.insert(layered, item)
         else
@@ -121,19 +124,25 @@ function love.draw()
     end
 end
 
-
-
 InitData.InstanceUpdate:Connect(function(ID:string, Type:string, Instance)
     Switch({
         ["Destroy"] = function(Stop, Roll, Push, Pop, Stack, ID:string, Instance)
             if Instances[ID] then
                 Instances[ID] = nil
             end
+
+            if Drawables[ID] then
+                Drawables[ID] = nil
+            end
             Stop()
         end;
 
         ["Create"] = function(Stop, Roll, Push, Pop, Stack, ID:string, Instance)
-            Instances[ID] = Instance
+            if Instance.Draw ~= nil then
+                Drawables[ID] = Instance
+            else
+                Instances[ID] = nil
+            end
             Stop()
         end;
     }, {ID, Instance}, Type)

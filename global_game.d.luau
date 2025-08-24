@@ -93,3 +93,14 @@ export type Frame = Instance & {
     Rotation:number;
     ZIndex:number
 }
+
+export type Setting = {
+    Save: (self: Setting) -> nil,
+    Load: (self: Setting) -> nil,
+    Set: (self: Setting, section: string, key: string, value: any) -> nil,
+    Get: (self: Setting, section: string, key: string) -> any,
+}
+
+export type SettingsService = {
+    new: () -> Setting,
+}
