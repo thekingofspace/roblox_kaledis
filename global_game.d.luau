@@ -1,5 +1,9 @@
 export type StartupRatios = {X:number, Y:number}
 
+export type KeyCode = string
+
+export type CursorTypes = string
+
 export type Color4 = {
     r: number,
     g: number,
@@ -103,4 +107,19 @@ export type Setting = {
 
 export type SettingsService = {
     new: () -> Setting,
+}
+
+export type Mouse = {
+    X: number,
+    Y: number,
+    Type: string,
+    SetIcon: (self: Mouse, Icon: CursorTypes) -> (),
+}
+
+export type UserInputService = {
+    InputBegan: ReadOnlySignal,
+    InputEnded: ReadOnlySignal,
+    MouseMoved: ReadOnlySignal,
+    IsKeyDown: (self: UserInputService, Keycode: KeyCode) -> boolean,
+    GetMouse: (self: UserInputService) -> Mouse,
 }

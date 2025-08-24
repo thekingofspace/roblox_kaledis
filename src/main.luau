@@ -4,7 +4,14 @@ local Color4, _Enum, _UDim, UDim2, _task, Instance = game:GetCommonElements()
 
 local Settings:SettingsService = game:GetService("Settings")
 
+local UserInput:UserInputService = game:GetService("UserInputService")
+
+UserInput.InputBegan:Connect(function(Keycode:KeyCode)
+    print(Keycode)
+end)
+
 local Config = Settings.new()
+
 
 local Values = {
     ["Volume"] = {

@@ -3,17 +3,134 @@
 
 return {
     StartupRatios = {
-        ["800x600"]   = {X = 800, Y = 600},     -- 4:3
-        ["1024x768"]  = {X = 1024, Y = 768},   -- 4:3
-        ["1280x960"]  = {X = 1280, Y = 960},   -- 4:3
-        ["1600x1200"] = {X = 1600, Y = 1200},  -- 4:3
-        ["1280x1024"] = {X = 1280, Y = 1024},  -- 5:4
-        ["1400x1050"] = {X = 1400, Y = 1050},  -- 4:3
-        ["1440x900"]  = {X = 1440, Y = 900},   -- 16:10
-        ["1680x1050"] = {X = 1680, Y = 1050},  -- 16:10
-        ["1600x900"]  = {X = 1600, Y = 900},   -- 16:9
-        ["1920x1080"] = {X = 1920, Y = 1080},  -- 16:9
-        ["2560x1440"] = {X = 2560, Y = 1440},  -- 16:9
-        ["3840x2160"] = {X = 3840, Y = 2160},  -- 4K UHD
-    };
+        ["800x600"]   = {X = 800, Y = 600},     
+        ["1024x768"]  = {X = 1024, Y = 768},   
+        ["1280x960"]  = {X = 1280, Y = 960},   
+        ["1600x1200"] = {X = 1600, Y = 1200},  
+        ["1280x1024"] = {X = 1280, Y = 1024},  
+        ["1400x1050"] = {X = 1400, Y = 1050},  
+        ["1440x900"]  = {X = 1440, Y = 900},   
+        ["1680x1050"] = {X = 1680, Y = 1050},  
+        ["1600x900"]  = {X = 1600, Y = 900},   
+        ["1920x1080"] = {X = 1920, Y = 1080},  
+        ["2560x1440"] = {X = 2560, Y = 1440},  
+        ["3840x2160"] = {X = 3840, Y = 2160},  
+    },
+    KeyCodes = {
+        a = "a",
+        b = "b",
+        c = "c",
+        d = "d",
+        e = "e",
+        f = "f",
+        g = "g",
+        h = "h",
+        i = "i",
+        j = "j",
+        k = "k",
+        l = "l",
+        m = "m",
+        n = "n",
+        o = "o",
+        p = "p",
+        q = "q",
+        r = "r",
+        s = "s",
+        t = "t",
+        u = "u",
+        v = "v",
+        w = "w",
+        x = "x",
+        y = "y",
+        z = "z",
+
+        ["0"] = "0",
+        ["1"] = "1",
+        ["2"] = "2",
+        ["3"] = "3",
+        ["4"] = "4",
+        ["5"] = "5",
+        ["6"] = "6",
+        ["7"] = "7",
+        ["8"] = "8",
+        ["9"] = "9",
+
+        ["space"] = "space",
+        ["return"] = "return",
+        ["backspace"] = "backspace",
+        ["tab"] = "tab",
+        ["escape"] = "escape",
+        ["delete"] = "delete",
+        ["lshift"] = "lshift",
+        ["rshift"] = "rshift",
+        ["lctrl"] = "lctrl",
+        ["rctrl"] = "rctrl",
+        ["lalt"] = "lalt",
+        ["ralt"] = "ralt",
+        ["lgui"] = "lgui",
+        ["rgui"] = "rgui",
+        ["apps"] = "apps",
+        ["pause"] = "pause",
+        ["capslock"] = "capslock",
+        ["scrolllock"] = "scrolllock",
+        ["numlock"] = "numlock",
+        ["printscreen"] = "printscreen",
+        ["insert"] = "insert",
+        ["home"] = "home",
+        ["end"] = "end",
+        ["pageup"] = "pageup",
+        ["pagedown"] = "pagedown",
+
+        ["up"] = "up",
+        ["down"] = "down",
+        ["left"] = "left",
+        ["right"] = "right",
+
+        ["-"] = "-",
+        ["="] = "=",
+        ["["] = "[",
+        ["]"] = "]",
+        ["\\"] = "\\",
+        [";"] = ";",
+        ["'"] = "'",
+        [","] = ",",
+        ["."] = ".",
+        ["/"] = "/",
+        ["`"] = "`",
+
+        f1 = "f1",
+        f2 = "f2",
+        f3 = "f3",
+        f4 = "f4",
+        f5 = "f5",
+        f6 = "f6",
+        f7 = "f7",
+        f8 = "f8",
+        f9 = "f9",
+        f10 = "f10",
+        f11 = "f11",
+        f12 = "f12",
+        f13 = "f13",
+        f14 = "f14",
+        f15 = "f15",
+
+        mouse_left="leftclick",
+        mouse_right="rightclick",
+        mouse_middle="middleclick",
+        wheel_up="wheel_up",
+        wheel_down ="wheel_down"
+    },
+
+    CursorTypes = {
+        Arrow      = "arrow",
+        IBeam      = "ibeam",
+        Wait       = "wait",
+        Crosshair  = "crosshair",
+        SizeNWSE   = "sizenwse",
+        SizeNESW   = "sizenesw",
+        SizeWE     = "sizewe",
+        SizeNS     = "sizens",
+        SizeAll    = "sizeall",
+        Hand       = "hand"
+    }
 }

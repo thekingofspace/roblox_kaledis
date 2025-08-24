@@ -2,7 +2,7 @@ local module = {
     Workspace = "Workspace";
 }
 
-type Services = "HTTP_Service" | "RunService" | "Datastore" | "Settings"
+type Services = "HTTP_Service" | "RunService" | "Datastore" | "Settings" | "UserInputService"
 
 local Enum = require("@game/Enum")
 local Signal = require("@game/signal")
@@ -17,18 +17,23 @@ local HTTP = require("@game/Services./EncodeService")
 local RunService = require("@game/Services/RunService")
 local Datastore = require("@game/Services/DataStore")
 local Settings = require("@game/Services/Settings")
+local UInput = require("@game/Services/InputService")
 
 local InitData = {
     RenderStep = Signal.CreateSignal();
     Heartbeat = Signal.CreateSignal();
-    InstanceUpdate = Signal.CreateSignal()
+    InstanceUpdate = Signal.CreateSignal();
+    InputBegan = Signal.CreateSignal();
+    InputEnded = Signal.CreateSignal();
+    MouseMoved = Signal.CreateSignal()
 }
 
 local Services = {
     ["HTTP_Service"] = HTTP;
     ["RunService"] = RunService,
     ["Datastore"] = Datastore,
-    ["Settings"] = Settings
+    ["Settings"] = Settings,
+    ["UserInputService"] = UInput
 }
 
 for I, item in pairs(Services) do
@@ -85,6 +90,44 @@ end
 function love.update(dt)
     InitData.Heartbeat:Fire()
     Task.Init.heartbeat(dt)
+end
+
+local MouseButtonNames = {
+    [1] = "leftclick",
+    [2] = "rightclick",
+    [3] = "middleclick",
+}
+
+function love.keypressed(key, scancode, isrepeat)
+    InitData.InputBegan:Fire(key)
+end
+
+function love.keyreleased(key, scancode)
+    InitData.InputEnded:Fire(key)
+end
+
+function love.mousepressed(x, y, button, istouch, presses)
+    local name = MouseButtonNames[button] or tostring(button)
+    InitData.InputBegan:Fire(name)
+end
+
+function love.mousereleased(x, y, button, istouch, presses)
+    local name = MouseButtonNames[button] or tostring(button)
+    InitData.InputEnded:Fire(name)
+end
+
+function love.wheelmoved(x, y)
+    if y > 0 then
+        InitData.InputBegan:Fire("wheel_up")
+        InitData.InputEnded:Fire("wheel_up")
+    elseif y < 0 then
+        InitData.InputBegan:Fire("wheel_down")
+        InitData.InputEnded:Fire("wheel_down")
+    end
+end
+
+function love.mousemoved(x, y, dx, dy, istouch)
+    InitData.MouseMoved:Fire(x, y, dx, dy)
 end
 
 local lastTime = love.timer.getTime()
