@@ -24,7 +24,8 @@ local PropertyTypes = {
         ClassName = "frozen",
         Changed = "frozen",
         ID = "frozen",
-        attributes = "table"
+        attributes = "table",
+        Destroyed = "frozen"
 }
 
 local PropertyTransform = {
@@ -35,7 +36,7 @@ local ReadTransform = {
 
 }
 
-function module.new(InstanceUpdate:Signal, GetID:() -> string)
+function module.new(InstanceUpdate:Signal, GetID:() -> string, UserInput)
     local Changed = Signal.CreateSignal()
 
     local UID = GetID()
@@ -45,7 +46,8 @@ function module.new(InstanceUpdate:Signal, GetID:() -> string)
         ClassName = "Class",
         Changed = Signal.CreateReadOnlySignal(Changed),
         ID = UID,
-        attributes = {}
+        attributes = {},
+        Destroyed = false
     }
 
     local RawMethods = {}
@@ -58,7 +60,7 @@ function module.new(InstanceUpdate:Signal, GetID:() -> string)
     end
 
     RawMethods.Clone = function(self)
-        local clone = module.new(InstanceUpdate, GetID)
+        local clone = module.new(InstanceUpdate, GetID, UserInput)
 
         for k, v in pairs(RawProperties) do
             if PropertyTypes[k] ~= "frozen" then
@@ -75,6 +77,7 @@ function module.new(InstanceUpdate:Signal, GetID:() -> string)
         table.clear(RawMethods)
         Changed = nil
         UID = nil
+        RawProperties.Destroyed = true
     end
 
     local self = {}

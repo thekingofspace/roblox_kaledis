@@ -114,6 +114,17 @@ return {
         f14 = "f14",
         f15 = "f15",
 
+        Numpad1 = "kp1";
+        Numpad2 = "kp2";
+        Numpad3 = "kp3";
+        Numpad4 = "kp4";
+        Numpad5 = "kp4";
+        Numpad6 = "kp5";
+        Numpad7 = "kp6";
+        Numpad8 = "kp7";
+        Numpad9 = "kp8";
+        Numpad0 = "kp9";
+
         mouse_left="leftclick",
         mouse_right="rightclick",
         mouse_middle="middleclick",

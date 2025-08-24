@@ -33,7 +33,8 @@ local PropertyTypes = {
     Anchorpoint = "table";
     Color = "table";
     Rotation = "number";
-    ZIndex = "number"
+    ZIndex = "number";
+    Destroyed = "frozen"
 }
 
 local PropertyTransform = {
@@ -50,13 +51,13 @@ local ReadTransform = {
     end
 }
 
-function module.new(InstanceUpdate: Signal, GetID: () -> string)
+function module.new(InstanceUpdate: Signal, GetID: () -> string, UserInput:UserInputService)
     local Changed = Signal.CreateSignal()
     local UID = GetID()
 
     local RawProperties = {
-        Name = "Class",
-        ClassName = "Class",
+        Name = "Frame",
+        ClassName = "Frame",
         Changed = Signal.CreateReadOnlySignal(Changed),
         ID = UID,
         attributes = {},
@@ -67,7 +68,8 @@ function module.new(InstanceUpdate: Signal, GetID: () -> string)
         Anchorpoint = Udim.UDim2.new(0.5, 0, 0.5, 0);
         Color = Color4.new("#ffffff");
         Rotation = 0;
-        ZIndex = 0
+        ZIndex = 0;
+        Destroyed = false
     }
 
     local RawMethods = {}
@@ -76,23 +78,23 @@ function module.new(InstanceUpdate: Signal, GetID: () -> string)
     end
 
     RawMethods.Draw = function(self)
-    if RawProperties.Parent == "Workspace" and RawProperties.Visible == true then
-        local px, py = RawProperties.Position:ToAbsolute(love.graphics.getWidth(), love.graphics.getHeight())
-        local sx, sy = RawProperties.Size:ToAbsolute(love.graphics.getWidth(), love.graphics.getHeight())
-        local ax, ay = RawProperties.Anchorpoint:ToAbsolute(sx, sy)
+        if RawProperties.Parent == "Workspace" and RawProperties.Visible == true then
+            local px, py = RawProperties.Position:ToAbsolute(love.graphics.getWidth(), love.graphics.getHeight())
+            local sx, sy = RawProperties.Size:ToAbsolute(love.graphics.getWidth(), love.graphics.getHeight())
+            local ax, ay = RawProperties.Anchorpoint:ToAbsolute(sx, sy)
 
-        local r, g, b, a = RawProperties.Color:toLove()
+            local r, g, b, a = RawProperties.Color:toLove()
 
-        love.graphics.push()
-        love.graphics.translate(px, py)
-        love.graphics.rotate(math.rad(RawProperties.Rotation))
-        love.graphics.setColor(r, g, b, a)
+            love.graphics.push()
+            love.graphics.translate(px, py)
+            love.graphics.rotate(math.rad(RawProperties.Rotation))
+            love.graphics.setColor(r, g, b, a)
 
-        love.graphics.rectangle("fill", -ax, -ay, sx, sy)
+            love.graphics.rectangle("fill", -ax, -ay, sx, sy)
 
-        love.graphics.pop()
+            love.graphics.pop()
+        end
     end
-end
 
     RawMethods.Destroy = function(self)
         InstanceUpdate:Fire(UID, "Destroy", self)
@@ -100,6 +102,7 @@ end
         table.clear(RawMethods)
         Changed = nil
         UID = nil
+        RawProperties.Destroyed = true
     end
 
     RawMethods.Clone = function(self)

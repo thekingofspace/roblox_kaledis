@@ -25,20 +25,20 @@ local InitData = {
     InstanceUpdate = Signal.CreateSignal();
     InputBegan = Signal.CreateSignal();
     InputEnded = Signal.CreateSignal();
-    MouseMoved = Signal.CreateSignal()
+    MouseMoved = Signal.CreateSignal();
 }
 
 local Services = {
-    ["HTTP_Service"] = HTTP;
-    ["RunService"] = RunService,
-    ["Datastore"] = Datastore,
-    ["Settings"] = Settings,
-    ["UserInputService"] = UInput
+    HTTP_Service = HTTP;
+    RunService = RunService;
+    Datastore = Datastore;
+    Settings = Settings;
+    UserInputService = UInput;
 }
 
-for I, item in pairs(Services) do
-    if item.Init.Build then
-        item.Init.Build(InitData)
+for _, service in pairs(Services) do
+    if service.Init.Build then
+        service.Init.Build(InitData)
     end
 end
 
@@ -51,11 +51,8 @@ local function generateNumericId()
     local id
 
     repeat
-        id = ""
-        local timePart = tostring(os.time())
-        id = id .. timePart
-
-        for i = #timePart + 1, length do
+        id = tostring(os.time())
+        while #id < length do
             id = id .. tostring(math.random(0, 9))
         end
     until not usedIds[id]
@@ -64,16 +61,16 @@ local function generateNumericId()
     return id
 end
 
-Instance.Init.Build(InitData, generateNumericId)
-
+Instance.Init.Build(InitData, generateNumericId, UInput.module)
 
 function module:GetCommonElements()
     return Color4, Enum, Udim.UDim, Udim.UDim2, Task.module, Instance.module
 end
 
-function module:GetService(Service:Services)
-    if Services[Service] then
-        return Services[Service].module
+function module:GetService(Service: Services)
+    local service = Services[Service]
+    if service then
+        return service.module
     else
         error("No service found under this name")
     end
@@ -83,9 +80,7 @@ local Instances = {}
 local Drawables = {}
 
 function love.load()
-    
 end
-
 
 function love.update(dt)
     InitData.Heartbeat:Fire()
@@ -98,20 +93,20 @@ local MouseButtonNames = {
     [3] = "middleclick",
 }
 
-function love.keypressed(key, scancode, isrepeat)
+function love.keypressed(key)
     InitData.InputBegan:Fire(key)
 end
 
-function love.keyreleased(key, scancode)
+function love.keyreleased(key)
     InitData.InputEnded:Fire(key)
 end
 
-function love.mousepressed(x, y, button, istouch, presses)
+function love.mousepressed(x, y, button)
     local name = MouseButtonNames[button] or tostring(button)
     InitData.InputBegan:Fire(name)
 end
 
-function love.mousereleased(x, y, button, istouch, presses)
+function love.mousereleased(x, y, button)
     local name = MouseButtonNames[button] or tostring(button)
     InitData.InputEnded:Fire(name)
 end
@@ -126,7 +121,7 @@ function love.wheelmoved(x, y)
     end
 end
 
-function love.mousemoved(x, y, dx, dy, istouch)
+function love.mousemoved(x, y, dx, dy)
     InitData.MouseMoved:Fire(x, y, dx, dy)
 end
 
@@ -141,9 +136,8 @@ function love.draw()
 
     local normal = {}
     local layered = {}
-    
     for _, item in pairs(Drawables) do
-        if item.ZIndex ~= nil then
+        if item.ZIndex then
             table.insert(layered, item)
         else
             table.insert(normal, item)
@@ -155,36 +149,26 @@ function love.draw()
     end)
 
     for _, item in ipairs(layered) do
-        if item.Draw then
-            item:Draw()
-        end
+        item:Draw()
     end
 
     for _, item in ipairs(normal) do
-        if item.Draw then
-            item:Draw()
-        end
+        item:Draw()
     end
 end
 
-InitData.InstanceUpdate:Connect(function(ID:string, Type:string, Instance)
+InitData.InstanceUpdate:Connect(function(ID: string, Type: string, Instance)
     Switch({
-        ["Destroy"] = function(Stop, Roll, Push, Pop, Stack, ID:string, Instance)
-            if Instances[ID] then
-                Instances[ID] = nil
-            end
-
-            if Drawables[ID] then
-                Drawables[ID] = nil
-            end
+        Destroy = function(Stop, _, _, _, _, ID: string)
+            Instances[ID] = nil
+            Drawables[ID] = nil
             Stop()
         end;
-
-        ["Create"] = function(Stop, Roll, Push, Pop, Stack, ID:string, Instance)
-            if Instance.Draw ~= nil then
+        Create = function(Stop, _, _, _, _, ID: string, Instance)
+            if Instance.Draw then
                 Drawables[ID] = Instance
             else
-                Instances[ID] = nil
+                Instances[ID] = Instance
             end
             Stop()
         end;

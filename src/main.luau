@@ -1,13 +1,15 @@
 local game = require("./game")
 local RunService:RunService = game:GetService("RunService")
-local Color4, _Enum, _UDim, UDim2, _task, Instance = game:GetCommonElements()
+local Color4, Enum, _UDim, UDim2, _task, Instance = game:GetCommonElements()
 
 local Settings:SettingsService = game:GetService("Settings")
 
 local UserInput:UserInputService = game:GetService("UserInputService")
 
 UserInput.InputBegan:Connect(function(Keycode:KeyCode)
-    print(Keycode)
+    if UserInput:IsKeyDown(Enum.KeyCodes.w) and UserInput:IsKeyDown(Enum.KeyCodes.s) then
+        print("Ran")
+    end
 end)
 
 local Config = Settings.new()
@@ -15,8 +17,20 @@ local Config = Settings.new()
 
 local Values = {
     ["Volume"] = {
-        ["Music Level"] = 50
-    }
+        ["Music Level"] = 50;
+        
+        ["Ambient"] = 50
+    };
+
+    ["Keybinds"] = {
+        ["Forward"] = Enum.KeyCodes.w;
+        
+        ["Back"] = Enum.KeyCodes.s;
+
+        ["Left"] = Enum.KeyCodes.a;
+
+        ["Right"] = Enum.KeyCodes.d;
+    };
 }
 
 for I, item in pairs(Values) do
@@ -42,14 +56,18 @@ Frame.Color = Color4.new("#885be3")
 
 local NewFrame:Frame = Frame:Clone()
 
-NewFrame.Color = Color4.new("#e81818")
+local Color = Color4.new("#e81818")
+
+Color.a = 0.2
+
+NewFrame.Color = Color
 
 NewFrame.Size = UDim2.new(0.3, 0, 0.3, 0)
 
 NewFrame.ZIndex = 1
 
 local direction = 1
-local speed = 0.2
+local speed = 5
 
 
 RunService.RenderStep:Connect(function(DT)
