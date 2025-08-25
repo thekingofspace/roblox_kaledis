@@ -2,21 +2,7 @@ export type StartupRatios = {X:number, Y:number}
 
 export type KeyCode = string
 
-export type CursorTypes =
-    | "arrow"
-    | "ibeam"
-    | "wait"
-    | "crosshair"
-    | "hand"
-    | "sizewe"
-    | "sizens"
-    | "sizenwse"
-    | "sizenesw"
-    | "sizeall"
-    | "no"
-    | "waitarrow"
-    | "hresize"
-    | "vresize";
+export type CursorTypes = string
 
 export type Instances = "Frame"
 
@@ -126,7 +112,7 @@ export type Setting = {
 }
 
 export type SettingsService = {
-    new: (Name:string) -> Setting,
+    new: () -> Setting,
 }
 
 export type Mouse = {

@@ -2,7 +2,7 @@ local module = {
     Workspace = "Workspace";
 }
 
-type Services = "HTTP_Service" | "RunService" | "Datastore" | "Settings" | "UserInputService"
+type Services = "EncoderService" | "RunService" | "Datastore" | "Settings" | "UserInputService"
 
 local Enum = require("@game/Enum")
 local Signal = require("@game/signal")
@@ -30,7 +30,7 @@ local InitData = {
 }
 
 local Services = {
-    HTTP_Service = HTTP;
+    EncoderService = HTTP;
     RunService = RunService;
     Datastore = Datastore;
     Settings = Settings;
@@ -136,26 +136,27 @@ function love.draw()
 
     InitData.RenderStep:Fire(dt)
 
-    local normal = {}
-    local layered = {}
-    for _, item in pairs(Drawables) do
-        if item.ZIndex then
-            table.insert(layered, item)
-        else
-            table.insert(normal, item)
+    local drawList = {}
+
+    local function getAbsoluteZ(item)
+        local z = item.ZIndex or 0
+        local parent = item.Parent
+        if type(parent) == "table" and parent.ZIndex then
+            return getAbsoluteZ(parent) + z
         end
+        return z
     end
 
-    table.sort(layered, function(a, b)
-        return a.ZIndex < b.ZIndex
+    for _, item in pairs(Drawables) do
+        table.insert(drawList, {obj = item, z = getAbsoluteZ(item)})
+    end
+
+    table.sort(drawList, function(a, b)
+        return a.z < b.z
     end)
 
-    for _, item in ipairs(layered) do
-        item:Draw()
-    end
-
-    for _, item in ipairs(normal) do
-        item:Draw()
+    for _, entry in ipairs(drawList) do
+        entry.obj:Draw()
     end
 end
 
@@ -205,7 +206,7 @@ function module:GetItemsInBound(Position:UDim2, Size:UDim2, IgnoreList:{Instance
     local bw, bh = Size:ToAbsolute(love.graphics.getWidth(), love.graphics.getHeight())
 
     for _, inst in pairs(Drawables) do
-        if inst.Visible ~= false and not table.find(IgnoreList, inst) and inst.Parent == module.Workspace and inst.CanQuery ==  true then
+        if inst.Visible ~= false and not table.find(IgnoreList, inst) and inst.Parent ~= nil and inst.CanQuery ==  true then
             local ix, iy, iw, ih = GetTruePosition(inst)
 
             if RectOverlap(bx, by, bw, bh, ix, iy, iw, ih) then

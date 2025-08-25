@@ -26,7 +26,7 @@ local PropertyTypes = {
     Changed = "frozen",
     ID = "frozen",
     attributes = "table",
-    Parent = {"nil", "string"},
+    Parent = {"nil", "string", "table"},
     Visible = "boolean",
     Size = "table";
     Position = "table";
@@ -40,15 +40,25 @@ local PropertyTypes = {
 
 local PropertyTransform = {
     Parent = function(_, Value)
-        if Value == "Workspace" or Value == nil then
-            return Value or "nil"
+            if typeof(Value) == "table" and Value.Draw ~= nil then
+                return Value
+            else
+                if Value == "Workspace" or Value == nil then
+                return Value or "nil"
+            end
+
+            return
         end
     end
 }
 
 local ReadTransform = {
     Parent = function(_, Value)
-        return Value == "nil" and nil or Value
+        if Value == "nil" then
+            return nil
+        else
+            return Value
+        end
     end
 }
 
@@ -79,23 +89,62 @@ function module.new(InstanceUpdate: Signal, GetID: () -> string, UserInput:UserI
         RawMethods[k] = v
     end
 
-    RawMethods.Draw = function(self)
-        if RawProperties.Parent == "Workspace" and RawProperties.Visible == true then
-            local px, py = RawProperties.Position:ToAbsolute(love.graphics.getWidth(), love.graphics.getHeight())
-            local sx, sy = RawProperties.Size:ToAbsolute(love.graphics.getWidth(), love.graphics.getHeight())
-            local ax, ay = RawProperties.Anchorpoint:ToAbsolute(sx, sy)
+    RawMethods.GetAbsolute = function(self)
+        local parent = RawProperties.Parent
+        local parentW, parentH = love.graphics.getWidth(), love.graphics.getHeight()
+        local parentX, parentY = 0, 0
 
-            local r, g, b, a = RawProperties.Color:toLove()
-
-            love.graphics.push()
-            love.graphics.translate(px, py)
-            love.graphics.rotate(math.rad(RawProperties.Rotation))
-            love.graphics.setColor(r, g, b, a)
-
-            love.graphics.rectangle("fill", -ax, -ay, sx, sy)
-
-            love.graphics.pop()
+        if type(parent) == "table" and parent.GetAbsolute and parent.GetAbsoluteSize then
+            parentW, parentH = parent:GetAbsoluteSize()
+            local parentAbs = parent:GetAbsolute()
+            parentX, parentY = parentAbs.X.Offset or 0, parentAbs.Y.Offset or 0
         end
+
+        local px, py = self.Position:ToAbsolute(parentW, parentH)
+        local sx, sy = self.Size:ToAbsolute(parentW, parentH)
+        local ax, ay = self.Anchorpoint:ToAbsolute(sx, sy)
+
+        local absX, absY = px - ax + parentX, py - ay + parentY
+        return Udim.UDim2.new(absX / love.graphics.getWidth(), 0, absY / love.graphics.getHeight(), 0)
+    end
+
+    RawMethods.GetAbsoluteSize = function(self)
+        local parent = RawProperties.Parent
+        local parentW, parentH = love.graphics.getWidth(), love.graphics.getHeight()
+        
+        if type(parent) == "table" and parent.GetAbsoluteSize then
+            parentW, parentH = parent:GetAbsoluteSize()
+        end
+        
+        return self.Size:ToAbsolute(parentW, parentH)
+    end
+
+    RawMethods.Draw = function(self)
+        if RawProperties.Visible ~= true and self.Parent ~= nil then return end
+
+        local parent = RawProperties.Parent
+        local parentW, parentH = love.graphics.getWidth(), love.graphics.getHeight()
+        local parentX, parentY = 0, 0
+
+        if type(parent) == "table" and parent.GetAbsolute and parent.GetAbsoluteSize then
+            parentW, parentH = parent:GetAbsoluteSize()
+            local parentAbs = parent:GetAbsolute()
+            parentX = parentAbs.X.Scale * love.graphics.getWidth() + parentAbs.X.Offset
+            parentY = parentAbs.Y.Scale * love.graphics.getHeight() + parentAbs.Y.Offset
+        end
+
+        local px, py = RawProperties.Position:ToAbsolute(parentW, parentH)
+        local sx, sy = RawProperties.Size:ToAbsolute(parentW, parentH)
+        local ax, ay = RawProperties.Anchorpoint:ToAbsolute(sx, sy)
+
+        local r, g, b, a = RawProperties.Color:toLove()
+
+        love.graphics.push()
+        love.graphics.translate(px + parentX, py + parentY)
+        love.graphics.rotate(math.rad(RawProperties.Rotation))
+        love.graphics.setColor(r, g, b, a)
+        love.graphics.rectangle("fill", -ax, -ay, sx, sy)
+        love.graphics.pop()
     end
 
     RawMethods.Destroy = function(self)
@@ -118,21 +167,6 @@ function module.new(InstanceUpdate: Signal, GetID: () -> string, UserInput:UserI
 
         return clone
     end
-
-RawMethods.GetAbsolute = function(self)
-    local screenW, screenH = love.graphics.getWidth(), love.graphics.getHeight()
-
-    local px, py = self.Position:ToAbsolute(screenW, screenH)
-    local sx, sy = self.Size:ToAbsolute(screenW, screenH)
-    local ax, ay = self.Anchorpoint:ToAbsolute(sx, sy)
-
-    local absX, absY = px - ax, py - ay
-
-    return Udim.UDim2.new(
-        absX / screenW, 0,
-        absY / screenH, 0
-    )
-end
 
     local self = {}
     local mt = {}

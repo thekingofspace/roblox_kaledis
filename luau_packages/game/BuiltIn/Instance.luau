@@ -16,8 +16,6 @@ function InitModule.Build(Aray:{RenderStep:Signal, Heartbeat:Signal, InstanceUpd
     UInput = Input
 end
 
-type Instances = "Frame"
-
 function module.new(Instance:Instances)
     if InstanceTypes[Instance] then
         return InstanceTypes[Instance].new(InstanceSignal, GetID, UInput)

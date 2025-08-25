@@ -10,7 +10,7 @@ UserInput.InputBegan:Connect(function(Keycode:KeyCode)
     end
 end)
 
-local Config = Settings.new()
+local Config = Settings.new("Main")
 
 local Values = {
     ["Volume"] = {
@@ -56,13 +56,20 @@ createWall("RightWall", UDim2.new(0.05, 0, 1, 0), UDim2.new(0.95, 0, 0, 0), wall
 local NewFrame:Frame = Instance.new("Frame")
 NewFrame.Color = Color4.new("#e81818")
 NewFrame.Name = "Player"
-NewFrame.Size = UDim2.new(0.05, 0, 0.05, 0)
+NewFrame.Size = UDim2.new(0.1, 0, 0.1, 0)
 NewFrame.Anchorpoint = UDim2.new(0.5, 0, 0.5, 0)
 NewFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 NewFrame.ZIndex = 1
 NewFrame.Parent = game.Workspace
 NewFrame.Visible = true
 
+local TestFrame:Frame = NewFrame:Clone()
+
+TestFrame.Size = UDim2.new(0.8, 0, 0.8, 0)
+
+TestFrame.Parent = NewFrame
+
+TestFrame.Color = wallColor
 
 local moveSpeed = 0.005
 
@@ -87,14 +94,14 @@ UserInput.InputTick:Connect(function(Keys)
     local moved = false
     
     local testXPos = UDim2.new(newX, 0, pos.Y.Scale, 0)
-    local hitX = game:GetItemsInBound(NewFrame:GetAbsolute() + UDim2.new(deltaX,0,0,0), NewFrame.Size, {NewFrame})
+    local hitX = game:GetItemsInBound(NewFrame:GetAbsolute() + UDim2.new(deltaX,0,0,0), NewFrame.Size, {NewFrame, TestFrame})
     if #hitX == 0 then
         NewFrame.Position = testXPos
         moved = true
     end
 
     local testYPos = UDim2.new(NewFrame.Position.X.Scale, 0, newY, 0)
-    local hitY = game:GetItemsInBound(NewFrame:GetAbsolute() + UDim2.new(0,0,deltaY,0), NewFrame.Size, {NewFrame})
+    local hitY = game:GetItemsInBound(NewFrame:GetAbsolute() + UDim2.new(0,0,deltaY,0), NewFrame.Size, {NewFrame, TestFrame})
     if #hitY == 0 then
         NewFrame.Position = testYPos
         moved = true
