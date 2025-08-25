@@ -57,20 +57,23 @@ createWall("BottomWall", UDim2.new(1, 0, 0.05, 0), UDim2.new(0, 0, 0.95, 0), wal
 createWall("LeftWall", UDim2.new(0.05, 0, 1, 0), UDim2.new(0, 0, 0, 0), wallColor)
 createWall("RightWall", UDim2.new(0.05, 0, 1, 0), UDim2.new(0.95, 0, 0, 0), wallColor):SetAttribute("Passthrough", true)
 
-local OldData:{X:number, Y:number}? = Section:GetAsync("PositionData")
+local OldData:{X:number, Y:number, YS:number, XS:number}? = Section:GetAsync("PositionData")
 local TruePos:UDim2 = nil
+local TrueSize:UDim2 = nil
 
 if OldData ~= nil then
     TruePos = UDim2.new(OldData.X, 0, OldData.Y, 0)
+    TrueSize = UDim2.new(OldData.XS, 0, OldData.YS, 0)
 else
     TruePos = UDim2.new(0.5, 0, 0.5, 0)
+    TrueSize = UDim2.new(0.1, 0, 0.1, 0)
 end
 
 
 local NewFrame:Frame = Instance.new("Frame")
 NewFrame.Color = Color4.new("#e81818")
 NewFrame.Name = "Player"
-NewFrame.Size = UDim2.new(0.1, 0, 0.1, 0)
+NewFrame.Size = TrueSize
 NewFrame.Anchorpoint = UDim2.new(0.5, 0, 0.5, 0)
 NewFrame.Position = TruePos
 NewFrame.ZIndex = 1
@@ -98,7 +101,7 @@ end)
 
 local TestFrame:Frame = NewFrame:Clone()
 
-TestFrame.Size = UDim2.new(0.8, 0, 0.8, 0)
+TestFrame.Size = UDim2.new(0.9, 0, 0.9, 0)
 
 TestFrame.Parent = NewFrame
 
@@ -163,6 +166,16 @@ UserInput.InputTick:Connect(function(Keys)
     end
 end)
 
-game:BindToClose(function()
-    Section:SetAsync("PositionData", {X = NewFrame.Position.X.Scale, Y = NewFrame.Position.Y.Scale})
+UserInput.InputBegan:Connect(function(KeyCode:KeyCode)
+    if KeyCode == Enum.KeyCodes.q then
+        NewFrame.Size += UDim2.new(0.05, 0, 0.05, 0)
+    elseif KeyCode == Enum.KeyCodes.e then
+        NewFrame.Size -= UDim2.new(0.05, 0, 0.05, 0)
+    end
 end)
+
+game:BindToClose(function()
+    Section:SetAsync("PositionData", {X = NewFrame.Position.X.Scale, Y = NewFrame.Position.Y.Scale, XS = NewFrame.Size.X.Scale, YS = NewFrame.Size.Y.Scale })
+end)
+
+local ExtendedLove = require("@packages/ExtendedLove")
