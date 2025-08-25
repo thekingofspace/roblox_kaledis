@@ -95,7 +95,10 @@ export type Frame = Instance & {
     Anchorpoint:UDim2;
     Color:Color4;
     Rotation:number;
-    ZIndex:number
+    ZIndex:number;
+    CanQuery:boolean;
+
+    GetAbsolute:(self:Frame) -> UDim2
 }
 
 export type Setting = {
@@ -120,6 +123,7 @@ export type UserInputService = {
     InputBegan: ReadOnlySignal,
     InputEnded: ReadOnlySignal,
     MouseMoved: ReadOnlySignal,
+    InputTick:ReadOnlySignal,
     IsKeyDown: (self: UserInputService, Keycode: KeyCode) -> boolean,
     GetMouse: (self: UserInputService) -> Mouse,
 }

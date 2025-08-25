@@ -18,12 +18,14 @@ local MouseMethods = {
     end
 }
 
-function InitModule.Build(Aray:{InputBegan:Signal, InputEnded:Signal, MouseMoved:Signal})
+function InitModule.Build(Aray:{InputBegan:Signal, InputEnded:Signal, MouseMoved:Signal, InputTick:Signal})
     module.InputBegan = Signal.CreateReadOnlySignal(Aray.InputBegan)
 
     module.InputEnded = Signal.CreateReadOnlySignal(Aray.InputEnded)
 
     module.MouseMoved = Signal.CreateReadOnlySignal(Aray.MouseMoved)
+
+    module.InputTick = Signal.CreateReadOnlySignal(Aray.InputTick)
 
     module.MouseMoved:Connect(function(X, Y)
         Mouse.X = X

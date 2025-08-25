@@ -34,7 +34,8 @@ local PropertyTypes = {
     Color = "table";
     Rotation = "number";
     ZIndex = "number";
-    Destroyed = "frozen"
+    Destroyed = "frozen";
+    CanQuery = "boolean";
 }
 
 local PropertyTransform = {
@@ -69,7 +70,8 @@ function module.new(InstanceUpdate: Signal, GetID: () -> string, UserInput:UserI
         Color = Color4.new("#ffffff");
         Rotation = 0;
         ZIndex = 0;
-        Destroyed = false
+        Destroyed = false;
+        CanQuery = true;
     }
 
     local RawMethods = {}
@@ -106,7 +108,7 @@ function module.new(InstanceUpdate: Signal, GetID: () -> string, UserInput:UserI
     end
 
     RawMethods.Clone = function(self)
-        local clone = module.new(InstanceUpdate, GetID)
+        local clone = module.new(InstanceUpdate, GetID, UserInput)
 
         for k, v in pairs(RawProperties) do
             if PropertyTypes[k] ~= "frozen" then
@@ -116,6 +118,21 @@ function module.new(InstanceUpdate: Signal, GetID: () -> string, UserInput:UserI
 
         return clone
     end
+
+RawMethods.GetAbsolute = function(self)
+    local screenW, screenH = love.graphics.getWidth(), love.graphics.getHeight()
+
+    local px, py = self.Position:ToAbsolute(screenW, screenH)
+    local sx, sy = self.Size:ToAbsolute(screenW, screenH)
+    local ax, ay = self.Anchorpoint:ToAbsolute(sx, sy)
+
+    local absX, absY = px - ax, py - ay
+
+    return Udim.UDim2.new(
+        absX / screenW, 0,
+        absY / screenH, 0
+    )
+end
 
     local self = {}
     local mt = {}

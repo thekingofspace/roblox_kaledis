@@ -26,6 +26,7 @@ local InitData = {
     InputBegan = Signal.CreateSignal();
     InputEnded = Signal.CreateSignal();
     MouseMoved = Signal.CreateSignal();
+    InputTick = Signal.CreateSignal()
 }
 
 local Services = {
@@ -82,32 +83,33 @@ local Drawables = {}
 function love.load()
 end
 
-function love.update(dt)
-    InitData.Heartbeat:Fire()
-    Task.Init.heartbeat(dt)
-end
-
 local MouseButtonNames = {
     [1] = "leftclick",
     [2] = "rightclick",
     [3] = "middleclick",
 }
 
+local keysDown = {}
+
 function love.keypressed(key)
+    keysDown[key] = true
     InitData.InputBegan:Fire(key)
 end
 
 function love.keyreleased(key)
+    keysDown[key] = nil
     InitData.InputEnded:Fire(key)
 end
 
 function love.mousepressed(x, y, button)
     local name = MouseButtonNames[button] or tostring(button)
+    keysDown[name] = true
     InitData.InputBegan:Fire(name)
 end
 
 function love.mousereleased(x, y, button)
     local name = MouseButtonNames[button] or tostring(button)
+    keysDown[name] = nil
     InitData.InputEnded:Fire(name)
 end
 
@@ -155,6 +157,74 @@ function love.draw()
     for _, item in ipairs(normal) do
         item:Draw()
     end
+end
+
+ local Data:{string}? = {}
+
+function love.update(dt)
+    InitData.Heartbeat:Fire()
+    Task.Init.heartbeat(dt)
+
+    if Data then
+        for I, item in pairs(keysDown) do
+            table.insert(Data, I)
+        end
+
+        if #Data ~= 0 then
+            InitData.InputTick:Fire(Data)
+
+            table.clear(Data)
+        end
+    end
+end
+
+local function GetTruePosition(Instance)
+
+    if not Instance.Position or not Instance.Size or not Instance.Anchorpoint then
+        return Udim.UDim2.new(0,0,0,0)
+    end
+
+    local px, py = Instance.Position:ToAbsolute(love.graphics.getWidth(), love.graphics.getHeight())
+
+    local sx, sy = Instance.Size:ToAbsolute(love.graphics.getWidth(), love.graphics.getHeight())
+
+    local ax, ay = Instance.Anchorpoint:ToAbsolute(sx, sy)
+
+    return px - ax, py - ay, sx, sy
+end
+
+local function RectOverlap(x1, y1, w1, h1, x2, y2, w2, h2)
+    return not (x1 + w1 < x2 or x2 + w2 < x1 or y1 + h1 < y2 or y2 + h2 < y1)
+end
+
+function module:GetItemsInBound(Position:UDim2, Size:UDim2, IgnoreList:{Instance?})
+    local results = {}
+    IgnoreList = IgnoreList or {}
+
+    local bx, by = Position:ToAbsolute(love.graphics.getWidth(), love.graphics.getHeight())
+    local bw, bh = Size:ToAbsolute(love.graphics.getWidth(), love.graphics.getHeight())
+
+    for _, inst in pairs(Drawables) do
+        if inst.Visible ~= false and not table.find(IgnoreList, inst) and inst.Parent == module.Workspace and inst.CanQuery ==  true then
+            local ix, iy, iw, ih = GetTruePosition(inst)
+
+            if RectOverlap(bx, by, bw, bh, ix, iy, iw, ih) then
+                table.insert(results, inst)
+            end
+        end
+    end
+
+    for _, inst in pairs(Instances) do
+        if inst.Visible ~= false and not table.find(IgnoreList, inst) then
+            local ix, iy, iw, ih = GetTruePosition(inst)
+
+            if RectOverlap(bx, by, bw, bh, ix, iy, iw, ih) then
+                table.insert(results, inst)
+            end
+        end
+    end
+
+    return results
 end
 
 InitData.InstanceUpdate:Connect(function(ID: string, Type: string, Instance)
