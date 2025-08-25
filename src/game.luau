@@ -26,7 +26,7 @@ local InitData = {
     InputBegan = Signal.CreateSignal();
     InputEnded = Signal.CreateSignal();
     MouseMoved = Signal.CreateSignal();
-    InputTick = Signal.CreateSignal()
+    InputTick = Signal.CreateSignal();
 }
 
 local Services = {
@@ -113,6 +113,18 @@ function love.mousereleased(x, y, button)
     InitData.InputEnded:Fire(name)
 end
 
+local QuitCode = nil
+
+function module:BindToClose(Callback)
+    QuitCode = Callback
+end
+
+function love.quit()
+    if QuitCode then
+        QuitCode()
+    end
+end
+
 function love.wheelmoved(x, y)
     if y > 0 then
         InitData.InputBegan:Fire("wheel_up")
@@ -129,36 +141,6 @@ end
 
 local lastTime = love.timer.getTime()
 
-function love.draw()
-    local currentTime = love.timer.getTime()
-    local dt = currentTime - lastTime
-    lastTime = currentTime
-
-    InitData.RenderStep:Fire(dt)
-
-    local drawList = {}
-
-    local function getAbsoluteZ(item)
-        local z = item.ZIndex or 0
-        local parent = item.Parent
-        if type(parent) == "table" and parent.ZIndex then
-            return getAbsoluteZ(parent) + z
-        end
-        return z
-    end
-
-    for _, item in pairs(Drawables) do
-        table.insert(drawList, {obj = item, z = getAbsoluteZ(item)})
-    end
-
-    table.sort(drawList, function(a, b)
-        return a.z < b.z
-    end)
-
-    for _, entry in ipairs(drawList) do
-        entry.obj:Draw()
-    end
-end
 
  local Data:{string}? = {}
 
@@ -226,6 +208,72 @@ function module:GetItemsInBound(Position:UDim2, Size:UDim2, IgnoreList:{Instance
     end
 
     return results
+end
+
+local function CheckCollisions(drawables)
+    for i = 1, #drawables do
+        local a = drawables[i]
+        local ax, ay, aw, ah = GetTruePosition(a)
+
+        if a.Visible ~= true or a.CanQuery == false then
+            continue
+        end
+
+        for j = i + 1, #drawables do
+            local b = drawables[j]
+
+            if b.Visible ~= true or b.CanQuery == false then
+                continue
+            end
+
+            if not b:IsDescendantOf(a) and not a:IsDescendantOf(b) then
+                local bx, by, bw, bh = GetTruePosition(b)
+
+                if RectOverlap(ax, ay, aw, ah, bx, by, bw, bh) then
+                    a.TouchedPrivate:Fire(b)
+                    b.TouchedPrivate:Fire(a)
+                    print(a.Name .. " touched " .. b.Name)
+                end
+            end
+        end
+    end
+end
+
+function love.draw()
+    local currentTime = love.timer.getTime()
+    local dt = currentTime - lastTime
+    lastTime = currentTime
+
+    InitData.RenderStep:Fire(dt)
+
+    local drawList = {}
+
+    local function getAbsoluteZ(item)
+        local z = item.ZIndex or 0
+        local parent = item.Parent
+        if type(parent) == "table" and parent.ZIndex then
+            return getAbsoluteZ(parent) + z
+        end
+        return z
+    end
+
+    for _, item in pairs(Drawables) do
+        table.insert(drawList, {obj = item, z = getAbsoluteZ(item)})
+    end
+
+    table.sort(drawList, function(a, b)
+        return a.z < b.z
+    end)
+
+    local onlyObjects = {}
+    for _, entry in ipairs(drawList) do
+        table.insert(onlyObjects, entry.obj)
+    end
+    CheckCollisions(onlyObjects)
+
+    for _, entry in ipairs(drawList) do
+        entry.obj:Draw()
+    end
 end
 
 InitData.InstanceUpdate:Connect(function(ID: string, Type: string, Instance)

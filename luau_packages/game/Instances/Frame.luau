@@ -24,6 +24,8 @@ local PropertyTypes = {
     Name = "string",
     ClassName = "frozen",
     Changed = "frozen",
+    Touched = "frozen",
+    TouchedPrivate = "frozen",
     ID = "frozen",
     attributes = "table",
     Parent = {"nil", "string", "table"},
@@ -64,12 +66,15 @@ local ReadTransform = {
 
 function module.new(InstanceUpdate: Signal, GetID: () -> string, UserInput:UserInputService)
     local Changed = Signal.CreateSignal()
+    local Touched = Signal.CreateSignal()
     local UID = GetID()
 
     local RawProperties = {
         Name = "Frame",
         ClassName = "Frame",
         Changed = Signal.CreateReadOnlySignal(Changed),
+        Touched = Signal.CreateReadOnlySignal(Touched),
+        TouchedPrivate = Touched,
         ID = UID,
         attributes = {},
         Parent = "nil",
@@ -154,6 +159,17 @@ function module.new(InstanceUpdate: Signal, GetID: () -> string, UserInput:UserI
         Changed = nil
         UID = nil
         RawProperties.Destroyed = true
+    end
+
+    RawMethods.IsDescendantOf = function(self, Target:Frame)
+        local CurrentParent = self.Parent
+        while CurrentParent do
+            if CurrentParent == Target then
+                return true
+            end
+            CurrentParent = CurrentParent.Parent
+        end
+        return false
     end
 
     RawMethods.Clone = function(self)

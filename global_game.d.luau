@@ -103,8 +103,9 @@ export type Instance = {
 }
 
 export type Frame = Instance & {
-    Parent: string | Instance | nil,
+    Parent: string | Instance? | nil,
     Visible:boolean;
+    Touched:ReadOnlySignal;
     Size:UDim2;
     Position:UDim2;
     Position:UDim2;
@@ -115,7 +116,8 @@ export type Frame = Instance & {
     CanQuery:boolean;
 
     GetAbsolute:(self:Frame) -> UDim2;
-    GetAbsoluteSize:(self:Frame) -> UDim2
+    GetAbsoluteSize:(self:Frame) -> UDim2;
+    IsDescendantOf:(self:Frame, Target:Instance?) -> boolean
 }
 
 export type Setting = {
