@@ -232,7 +232,6 @@ local function CheckCollisions(drawables)
                 if RectOverlap(ax, ay, aw, ah, bx, by, bw, bh) then
                     a.TouchedPrivate:Fire(b)
                     b.TouchedPrivate:Fire(a)
-                    print(a.Name .. " touched " .. b.Name)
                 end
             end
         end
