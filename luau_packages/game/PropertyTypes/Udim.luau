@@ -5,6 +5,7 @@ function UDim.new(scale, offset):UDim
     local self = setmetatable({}, UDim)
     self.Scale = scale or 0
     self.Offset = offset or 0
+    self.Type = "Udim"
     return self
 end
 
@@ -27,6 +28,7 @@ function UDim2.new(xScale, xOffset, yScale, yOffset):UDim2
     local self = setmetatable({}, UDim2)
     self.X = UDim.new(xScale, xOffset)
     self.Y = UDim.new(yScale, yOffset)
+    self.Type = "Udim2"
     return self
 end
 

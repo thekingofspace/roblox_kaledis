@@ -20,6 +20,7 @@ function Color.new(r, g, b, a):Color4
     self.g = math.max(0, math.min(1, g/255))
     self.b = math.max(0, math.min(1, b/255))
     self.a = math.max(0, math.min(1, a/255))
+    self.Type = "Color4"
 
     return self
 end

@@ -2,7 +2,7 @@ local module = {
     Workspace = "Workspace";
 }
 
-type Services = "EncoderService" | "RunService" | "Datastore" | "Settings" | "UserInputService" | "DesktopService"
+type Services = "EncoderService" | "RunService" | "Datastore" | "Settings" | "UserInputService" | "DesktopService"| "TweenService"
 
 local Enum = require("@game/Enum")
 local Signal = require("@game/signal")
@@ -19,6 +19,7 @@ local Datastore = require("@game/Services/DataStore")
 local Settings = require("@game/Services/Settings")
 local UInput = require("@game/Services/InputService")
 local Desktop = require("@game/Services/DesktopService")
+local Tween = require("@game/Services/TweenService")
 
 local InitData = {
     RenderStep = Signal.CreateSignal();
@@ -37,7 +38,8 @@ local Services = {
     Datastore = Datastore;
     Settings = Settings;
     UserInputService = UInput;
-    DesktopService = Desktop
+    DesktopService = Desktop;
+    TweenService = Tween
 }
 
 for _, service in pairs(Services) do
@@ -138,10 +140,24 @@ local function GetTruePosition(Instance)
 
     local px, py = Instance.Position:ToAbsolute(love.graphics.getWidth(), love.graphics.getHeight())
     local sx, sy = Instance.Size:ToAbsolute(love.graphics.getWidth(), love.graphics.getHeight())
-    local ax, ay = Instance.Anchorpoint:ToAbsolute(sx, sy)
     local rotation = Instance.Rotation or 0
 
-    return px - ax, py - ay, sx, sy, rotation
+    local ax, ay = Instance.Anchorpoint:ToAbsolute(sx, sy)
+    
+    local finalX = px - ax
+    local finalY = py - ay
+    
+    if sx < 0 then
+        finalX = finalX + sx
+        sx = -sx
+    end
+    
+    if sy < 0 then
+        finalY = finalY + sy
+        sy = -sy
+    end
+
+    return finalX, finalY, sx, sy, rotation
 end
 
 local function RotatePoint(px, py, cx, cy, angle)
@@ -275,6 +291,15 @@ function module:GetItemsInBound(Position:UDim2, Size:UDim2, IgnoreList:{Instance
 
     local bx, by = Position:ToAbsolute(love.graphics.getWidth(), love.graphics.getHeight())
     local bw, bh = Size:ToAbsolute(love.graphics.getWidth(), love.graphics.getHeight())
+
+    if bw < 0 then
+        bx = bx + bw
+        bw = -bw
+    end
+    if bh < 0 then
+        by = by + bh
+        bh = -bh
+    end
 
     for _, inst in pairs(Drawables) do
         if inst.Visible ~= false and not table.find(IgnoreList, inst) and inst.Parent ~= nil and inst.CanQuery == true then

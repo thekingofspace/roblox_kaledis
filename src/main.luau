@@ -1,14 +1,13 @@
 local game = require("./game")
-local Color4, Enum, _UDim, UDim2, _task, Instance = game:GetCommonElements()
+local Color4, Enum, _UDim, UDim2, task, Instance = game:GetCommonElements()
 
 local Settings:SettingsService = game:GetService("Settings")
 local UserInput:UserInputService = game:GetService("UserInputService")
-local RunService:RunService = game:GetService("RunService")
+local TweenSerive:TweenService = game:GetService("TweenService")
 
 local DataStoreService:DatastoreService = game:GetService("Datastore")
 
 local DesktopService:DesktopService  = game:GetService("DesktopService")
-
 
 local _ExtendedLove = require("@packages/ExtendedLove")
 
@@ -46,7 +45,6 @@ local Sound:Sound  = Instance.new("Sound")
 
 Sound.Sound = "sounds/On.wav"
 
-Sound.Looped  = true
 
 local function createWall(name, size, position, color)
     local wall:Frame = Instance.new("Frame")
@@ -112,7 +110,6 @@ NewFrame.MouseClickRelease:Connect(function(Key)
         Sound:Stop()
     end
 end)
-
 
 NewFrame.HoverBegan:Connect(function()
     Mouse:SetIcon(Enum.CursorTypes.Hand)
@@ -203,9 +200,15 @@ game:BindToClose(function()
     Section:SetAsync("PositionData", {X = NewFrame.Position.X.Scale, Y = NewFrame.Position.Y.Scale, XS = NewFrame.Size.X.Scale, YS = NewFrame.Size.Y.Scale })
 end)
 
-
-RunService.RenderStep:Connect(function()
-    NewFrame.Rotation += 1
+task.spawn(function()
+    task.wait(5)
+    while true do
+        local Tween  =  TweenSerive:Create(NewFrame, 6, Enum.EasingStyles.Back, Enum.EasingDirections.In, {Color = Color4.new("#7d74fa"), Rotation =  360})
+        Tween:Play()
+        Tween.Completed:Wait()
+        NewFrame.Rotation = 0
+    end
 end)
+
 
 DesktopService:SetWindowName("Guh")

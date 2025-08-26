@@ -17,6 +17,8 @@ end
 function module.new(Instance:Instances)
     if InstanceTypes[Instance] then
         return InstanceTypes[Instance].new(InstanceSignal, GetID)
+    else
+        return
     end
 end
 

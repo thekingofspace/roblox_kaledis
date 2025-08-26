@@ -224,3 +224,23 @@ export type DesktopService = {
     SetWindowName: (self: DesktopService, Name: string) -> (),
     SetIcon: (self: DesktopService, Icon: any) -> (),
 }
+
+export type EasingStyle = "Linear" | "Exponential" | "Cubic" | "Quart" | "Quint" | "Sine" | "Bounce" | "Back" | "Elastic"
+export type EasingDirection = "In" | "Out" | "InOut"
+
+export type Tween = {
+    Instance: Instance,
+    Time: number,
+    Properties: {[string]: any},
+    StartValues: {[string]: any},
+    EndValues: {[string]: any},
+    Easing: (alpha: number) -> number,
+    Completed: ReadOnlySignal<>,
+    Playing: boolean,
+
+    Play: (self: Tween) -> (),
+}
+
+export type TweenService = {
+    Create: (self: any, instance: Instance?, time: number, easingStyle: EasingStyle, easingDirection: EasingDirection, properties: {[string]: any}) -> Tween
+}
