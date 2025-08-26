@@ -21,13 +21,27 @@ function module.new(InstanceUpdate: Signal, GetID: () -> string, UserInput)
         local Methods: {Method} = {}
         local ExtendedMethods: {Method} = {}
 
-        table.insert(RawProperty, {
+        table.insert(RawProperty, { -- New Property
             Property = "test";
             Type = "boolean";
             Value = true
         })
 
-        table.insert(Methods, {
+        table.insert(RawProperty, { -- Writing over old property
+            Property = "Visible";
+            Type = "boolean";
+            Value = false
+        })
+
+        table.insert(Methods, { -- Writing over old  method
+            Method = "Draw";
+
+            Code = function(self)
+                print("ran")
+            end
+        })
+
+        table.insert(Methods, { -- new method
             Method = "Test";
 
             Code = function(self)
@@ -35,7 +49,7 @@ function module.new(InstanceUpdate: Signal, GetID: () -> string, UserInput)
             end
         })
 
-        table.insert(ExtendedMethods, {
+        table.insert(ExtendedMethods, { -- Injects a new function to be run before destroy.
             Method = "Destroy";
 
             Code = function(self)

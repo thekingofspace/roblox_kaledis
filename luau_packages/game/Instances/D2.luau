@@ -86,6 +86,7 @@ function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Pr
     local Touched = Signal.CreateSignal()
     local TouchedStarted = Signal.CreateSignal()
     local UID = GetID()
+    local self = {}
     
     local PropertyTypes = RealProperties
 
@@ -246,11 +247,16 @@ function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Pr
         end
 
         for I, item in ipairs(Methods) do
-            RawMethods[item.Method] = item.Code
+            RawMethods[item.Method] = function()
+                if ExtendMethod[item.Method] then
+                    ExtendMethod[item.Method](self)
+                end
+
+                item.Code(self)
+            end
         end
     end
-    
-    local self = {}
+
     local mt = {
         __index = function(_, index)
             if RawProperties[index] then
