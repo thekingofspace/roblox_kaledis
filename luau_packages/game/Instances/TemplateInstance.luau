@@ -28,19 +28,6 @@ local RealProperties = {
         Destroyed = "frozen"
 }
 
-export type Property = {
-    Property: string,
-    Type: string | {string},
-    Value: any,
-    WriteTransform: ((self: any, OldValue: any) -> ...any)?,
-    ReadTransform: ((self: any, OldValue: any) -> any)?,
-}
-
-export type Method = {
-    Method: string,
-    Code: (self: any, ...any) -> ...any,
-}
-
 function module.new(InstanceUpdate:Signal, GetID:() -> string, UserInput, SuperConstruct:(() -> ({Property}, {Method}, {Method}))?)
     local Changed = Signal.CreateSignal()
     local self = {}
