@@ -201,6 +201,8 @@ function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Pr
             ExtendMethod["Destroy"](self)
         end
 
+        self.Parent = nil
+
         InstanceUpdate:Fire(UID, "Destroy", self)
         table.clear(RawProperties)
         table.clear(RawMethods)

@@ -194,6 +194,10 @@ game:BindToClose(function()
     Section:SetAsync("PositionData", {X = NewFrame.Position.X.Scale, Y = NewFrame.Position.Y.Scale, XS = NewFrame.Size.X.Scale, YS = NewFrame.Size.Y.Scale })
 end)
 
+_task.delay(5,function()
+    print(game:Raycast(UDim2.new(0.5, 0, 0.5, 0), UDim2.new(0, 0, 1, 0), 1000))
+end)
+
 RunService.RenderStep:Connect(function()
     NewFrame.Rotation += 1
 end)

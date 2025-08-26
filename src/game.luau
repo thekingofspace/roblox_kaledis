@@ -27,6 +27,7 @@ local InitData = {
     InputEnded = Signal.CreateSignal();
     MouseMoved = Signal.CreateSignal();
     InputTick = Signal.CreateSignal();
+    Window_Resize = Signal.CreateSignal();
 }
 
 local Services = {
@@ -516,6 +517,178 @@ function module:GetType(I:Instance?)
         return typeof(I)
     end
 end
+
+-- Helper function for ray-rectangle intersection
+function RayRectIntersect(rayX, rayY, dirX, dirY, rectX, rectY, rectW, rectH, rotation, maxDist)
+    if rotation == 0 then
+        -- Axis-aligned rectangle intersection (faster)
+        return RayAABBIntersect(rayX, rayY, dirX, dirY, rectX, rectY, rectW, rectH, maxDist)
+    else
+        -- Rotated rectangle intersection
+        return RayOBBIntersect(rayX, rayY, dirX, dirY, rectX, rectY, rectW, rectH, rotation, maxDist)
+    end
+end
+
+-- Ray vs Axis-Aligned Bounding Box intersection
+function RayAABBIntersect(rayX, rayY, dirX, dirY, rectX, rectY, rectW, rectH, maxDist)
+    local minX, maxX = rectX, rectX + rectW
+    local minY, maxY = rectY, rectY + rectH
+    
+    local tMinX = (minX - rayX) / dirX
+    local tMaxX = (maxX - rayX) / dirX
+    
+    if tMinX > tMaxX then
+        tMinX, tMaxX = tMaxX, tMinX
+    end
+    
+    local tMinY = (minY - rayY) / dirY
+    local tMaxY = (maxY - rayY) / dirY
+    
+    if tMinY > tMaxY then
+        tMinY, tMaxY = tMaxY, tMinY
+    end
+    
+    local tMin = math.max(tMinX, tMinY)
+    local tMax = math.min(tMaxX, tMaxY)
+    
+    if tMax < 0 or tMin > tMax or tMin > maxDist then
+        return nil
+    end
+    
+    local t = tMin >= 0 and tMin or tMax
+    if t > maxDist then
+        return nil
+    end
+    
+    local hitX = rayX + dirX * t
+    local hitY = rayY + dirY * t
+    
+    -- Calculate normal
+    local normal = {x = 0, y = 0}
+    local centerX, centerY = rectX + rectW/2, rectY + rectH/2
+    local relX, relY = hitX - centerX, hitY - centerY
+    
+    if math.abs(relX) > math.abs(relY) then
+        normal.x = relX > 0 and 1 or -1
+    else
+        normal.y = relY > 0 and 1 or -1
+    end
+    
+    return {x = hitX, y = hitY, normal = normal}, t
+end
+
+function RayOBBIntersect(rayX, rayY, dirX, dirY, rectX, rectY, rectW, rectH, rotation, maxDist)
+    local centerX, centerY = rectX + rectW/2, rectY + rectH/2
+    local halfW, halfH = rectW/2, rectH/2
+    
+    local cos_r = math.cos(-rotation)
+    local sin_r = math.sin(-rotation)
+    
+    local localRayX = rayX - centerX
+    local localRayY = rayY - centerY
+    
+    local transformedRayX = localRayX * cos_r - localRayY * sin_r
+    local transformedRayY = localRayX * sin_r + localRayY * cos_r
+    
+    local transformedDirX = dirX * cos_r - dirY * sin_r
+    local transformedDirY = dirX * sin_r + dirY * cos_r
+    
+    local result, distance = RayAABBIntersect(
+        transformedRayX, transformedRayY,
+        transformedDirX, transformedDirY,
+        -halfW, -halfH, rectW, rectH,
+        maxDist
+    )
+    
+    if not result then
+        return nil
+    end
+    
+    local localHitX, localHitY = result.x, result.y
+    local worldHitX = localHitX * cos_r - localHitY * sin_r + centerX
+    local worldHitY = localHitX * sin_r + localHitY * cos_r + centerY
+    
+    local localNormalX, localNormalY = result.normal.x, result.normal.y
+    local worldNormalX = localNormalX * cos_r - localNormalY * sin_r
+    local worldNormalY = localNormalX * sin_r + localNormalY * cos_r
+    
+    return {
+        x = worldHitX, 
+        y = worldHitY, 
+        normal = {x = worldNormalX, y = worldNormalY}
+    }, distance
+end
+
+function module:Raycast(Origin: UDim2, Direction: UDim2, MaxDistance: number?, IgnoreList: {Instance?}?)
+    MaxDistance = MaxDistance or 1000
+    IgnoreList = IgnoreList or {}
+    
+    local screenWidth = love.graphics.getWidth()
+    local screenHeight = love.graphics.getHeight()
+    
+    local startX, startY = Origin:ToAbsolute(screenWidth, screenHeight)
+    local dirX, dirY = Direction:ToAbsolute(screenWidth, screenHeight)
+    
+    local dirLength = math.sqrt(dirX * dirX + dirY * dirY)
+    if dirLength == 0 then
+        return nil, startX, startY
+    end
+    
+    dirX = dirX / dirLength
+    dirY = dirY / dirLength
+    
+    local results = {}
+    
+    local allObjects = {}
+        for _, obj in pairs(Drawables) do
+            table.insert(allObjects, obj)
+        end
+        for _, obj in pairs(Instances) do
+            table.insert(allObjects, obj)
+        end
+        
+        for _, inst in pairs(allObjects) do
+        if IgnoreList then
+            if inst.Visible == false
+            or table.find(IgnoreList, inst)
+            or inst.Parent == nil
+            or (inst.CanQuery ~= nil and inst.CanQuery == false) then
+                continue
+            end
+        end
+
+        local x, y, w, h, rotation = GetTruePosition(inst)
+
+        local hitPoint, distance = RayRectIntersect(
+            startX, startY, dirX, dirY,
+            x, y, w, h, rotation or 0,
+            MaxDistance
+        )
+
+        if hitPoint then
+            table.insert(results, {
+                Instance = inst,
+                Position = Udim.UDim2.new(0, hitPoint.x, 0, hitPoint.y),
+                Distance = distance,
+                Normal = hitPoint.normal
+            })
+        end
+    end
+    
+    table.sort(results, function(a, b)
+        return a.Distance < b.Distance
+    end)
+    
+    if #results > 0 then
+        local closest = results[1]
+        return closest.Instance, closest.Position.X.Offset, closest.Position.Y.Offset, closest.Distance, closest.Normal
+    end
+    
+    local endX = startX + dirX * MaxDistance
+    local endY = startY + dirY * MaxDistance
+    return nil, endX, endY, MaxDistance, nil
+end
+
 InitData.InstanceUpdate:Connect(function(ID: string, Type: string, Instance)
     Switch({
         Destroy = function(Stop, _, _, _, _, ID: string)
