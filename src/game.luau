@@ -84,9 +84,9 @@ function love.load()
 end
 
 local MouseButtonNames = {
-    [1] = "leftclick",
-    [2] = "rightclick",
-    [3] = "middleclick",
+    [1] = "mouse_left",
+    [2] = "mouse_right",
+    [3] = "mouse_middle",
 }
 
 local keysDown = {}
@@ -99,18 +99,6 @@ end
 function love.keyreleased(key)
     keysDown[key] = nil
     InitData.InputEnded:Fire(key)
-end
-
-function love.mousepressed(x, y, button)
-    local name = MouseButtonNames[button] or tostring(button)
-    keysDown[name] = true
-    InitData.InputBegan:Fire(name)
-end
-
-function love.mousereleased(x, y, button)
-    local name = MouseButtonNames[button] or tostring(button)
-    keysDown[name] = nil
-    InitData.InputEnded:Fire(name)
 end
 
 local QuitCode = nil
@@ -135,31 +123,11 @@ function love.wheelmoved(x, y)
     end
 end
 
-function love.mousemoved(x, y, dx, dy)
-    InitData.MouseMoved:Fire(x, y, dx, dy)
-end
-
 local lastTime = love.timer.getTime()
 
 
  local Data:{string}? = {}
-
-function love.update(dt)
-    InitData.Heartbeat:Fire()
-    Task.Init.heartbeat(dt)
-
-    if Data then
-        for I, item in pairs(keysDown) do
-            table.insert(Data, I)
-        end
-
-        if #Data ~= 0 then
-            InitData.InputTick:Fire(Data)
-
-            table.clear(Data)
-        end
-    end
-end
+ local pressedInstances = {}
 
 local function GetTruePosition(Instance)
 
@@ -219,14 +187,14 @@ local function CheckCollisions(drawables)
         local a = drawables[i]
         local ax, ay, aw, ah = GetTruePosition(a)
 
-        if a.Visible ~= true or a.CanQuery == false then
+        if a.Visible ~= true or a.CanQuery == false or a.SinkInputs == false then
             continue
         end
 
         for j = i + 1, #drawables do
             local b = drawables[j]
 
-            if b.Visible ~= true or b.CanQuery == false then
+            if b.Visible ~= true or b.CanQuery == false or a.SinkInputs == false then
                 continue
             end
 
@@ -261,6 +229,46 @@ local function CheckCollisions(drawables)
     activeCollisions = newCollisions
 end
 
+local hoveredInstances = {}
+
+local function CheckMouseHover(drawables)
+    local mx, my = love.mouse.getPosition()
+    local newHovered = {}
+
+    for _, inst in ipairs(drawables) do
+        if inst.Visible ~= false and inst.CanQuery == true and inst.SinkInputs == true then
+            local x, y, w, h = GetTruePosition(inst)
+
+            if mx >= x and mx <= x + w and my >= y and my <= y + h then
+                newHovered[inst] = true
+
+                if not hoveredInstances[inst] then
+                    if inst.HoverBegan_Private then
+                        inst.HoverBegan_Private:Fire()
+                    end
+                end
+            end
+        end
+    end
+
+    for inst, _ in pairs(hoveredInstances) do
+        if not newHovered[inst] then
+            if inst.HoverEnded_Private and inst.SinkInputs == true then
+                inst.HoverEnded_Private:Fire()
+            end
+
+            if pressedInstances[inst] then
+                if inst.MouseClickRelease_Private then
+                    inst.MouseClickRelease_Private:Fire()
+                end
+                pressedInstances[inst] = nil
+            end
+        end
+    end
+
+    hoveredInstances = newHovered
+end
+
 function love.draw()
     local currentTime = love.timer.getTime()
     local dt = currentTime - lastTime
@@ -293,11 +301,67 @@ function love.draw()
     end
 
     CheckCollisions(onlyObjects)
+    CheckMouseHover(onlyObjects)
 
     for _, entry in ipairs(drawList) do
         entry.obj:Draw()
     end
 end
+
+function love.mousepressed(x, y, button)
+    local name = MouseButtonNames[button] or tostring(button)
+    keysDown[name] = true
+    InitData.InputBegan:Fire(name)
+
+    for inst, _ in pairs(hoveredInstances) do
+        if inst.SinkInputs ~= true then
+            continue
+        end
+        inst.MouseClick_Private:Fire(name)
+        pressedInstances[inst] = true
+    end
+end
+
+function love.mousereleased(x, y, button)
+    local name = MouseButtonNames[button] or tostring(button)
+    keysDown[name] = nil
+    InitData.InputEnded:Fire(name)
+
+    for inst, _ in pairs(pressedInstances) do
+        if inst.MouseClickRelease_Private then
+            inst.MouseClickRelease_Private:Fire(name)
+        end
+    end
+
+    pressedInstances = {}
+end
+
+function love.mousemoved(x, y, dx, dy)
+    InitData.MouseMoved:Fire(x, y, dx, dy)
+    local drawList = {}
+    for _, item in pairs(Drawables) do table.insert(drawList, item) end
+    for _, item in pairs(Instances) do table.insert(drawList, item) end
+    CheckMouseHover(drawList)
+end
+
+
+function love.update(dt)
+    InitData.Heartbeat:Fire()
+    Task.Init.heartbeat(dt)
+
+    if Data then
+        for I, item in pairs(keysDown) do
+            table.insert(Data, I)
+        end
+
+        if #Data ~= 0 then
+            InitData.InputTick:Fire(Data)
+
+            table.clear(Data)
+        end
+    end
+end
+
 
 function module:GetType(I:Instance?)
     if typeof(I) == "table" and I.ClassName then

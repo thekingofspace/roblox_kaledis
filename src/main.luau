@@ -90,6 +90,28 @@ end)
 NewFrame.TouchEnded:Connect(function(B:UI_2D?)
     NewFrame.Color = Color4.new("#e81818")
 end)
+local Mouse = UserInput:GetMouse()
+
+NewFrame.MouseClick:Connect(function(Key)
+    if Enum.KeyCodes[Key] == Enum.KeyCodes.mouse_right then
+        print("Ran")
+    end
+end)
+
+NewFrame.MouseClickRelease:Connect(function(Key)
+    if Enum.KeyCodes[Key] == Enum.KeyCodes.mouse_left then
+        print("Ran")
+    end
+end)
+
+
+NewFrame.HoverBegan:Connect(function()
+    Mouse:SetIcon(Enum.CursorTypes.Hand)
+end)
+
+NewFrame.HoverEnded:Connect(function()
+    Mouse:SetIcon(Enum.CursorTypes.Arrow)
+end)
 
 local TestFrame:Frame = NewFrame:Clone()
 

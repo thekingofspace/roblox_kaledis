@@ -116,6 +116,11 @@ export type UI_2D = Instance & {
     Rotation:number;
     ZIndex:number;
     CanQuery:boolean;
+    SinkInputs:boolean;
+    HoverBegan:ReadOnlySignal;
+    HoverEnded:ReadOnlySignal;
+    MouseClick:ReadOnlySignal;
+    MouseClickRelease:ReadOnlySignal;
 
     GetAbsolute:(self:Frame) -> UDim2;
     GetAbsoluteSize:(self:Frame) -> UDim2;

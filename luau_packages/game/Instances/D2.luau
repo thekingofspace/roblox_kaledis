@@ -25,6 +25,15 @@ local RealProperties = {
     ZIndex = "number",
     Destroyed = "frozen",
     CanQuery = "boolean",
+    HoverBegan = "frozen",
+    HoverEnded = "frozen",
+    MouseClick = "frozen",
+    HoverBegan_Private = "frozen",
+    HoverEnded_Private = "frozen",
+    MouseClick_Private = "frozen",
+    MouseClickRelease_Private = "frozen";
+    MouseClickRelease = "frozen";
+    SinkInputs = "boolean"
 }
 
 local PropertyTransform = {
@@ -85,6 +94,10 @@ function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Pr
     local Changed = Signal.CreateSignal()
     local Touched = Signal.CreateSignal()
     local TouchedStarted = Signal.CreateSignal()
+    local HoverBegan = Signal.CreateSignal()
+    local HoverEnded = Signal.CreateSignal()
+    local MouseClick = Signal.CreateSignal()
+    local MouseClick_release = Signal.CreateSignal()
     local UID = GetID()
     local self = {}
     
@@ -110,6 +123,17 @@ function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Pr
         ZIndex = 0,
         Destroyed = false,
         CanQuery = true,
+        SinkInputs = true;
+
+        HoverBegan = Signal.CreateReadOnlySignal(HoverBegan),
+        HoverEnded = Signal.CreateReadOnlySignal(HoverEnded),
+        MouseClick = Signal.CreateReadOnlySignal(MouseClick),
+        MouseClickRelease = Signal.CreateReadOnlySignal(MouseClick_release),
+
+        MouseClickRelease_Private = MouseClick_release,
+        HoverBegan_Private = HoverBegan,
+        HoverEnded_Private = HoverEnded,
+        MouseClick_Private = MouseClick,
     }
     
     local RawMethods = {}
@@ -197,6 +221,16 @@ function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Pr
         table.clear(PropertyTypes)
         PropertyTypes = nil
         TouchedStarted:Destroy()
+        HoverBegan:Destroy()
+        HoverEnded:Destroy()
+        MouseClick:Destroy()
+        MouseClick_release:Destroy()
+
+        HoverBegan = nil
+        HoverEnded = nil
+        MouseClick = nil
+        MouseClick = nil
+        MouseClick_release = nil
         Changed = nil
         Touched = nil
         TouchedStarted = nil
