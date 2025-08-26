@@ -72,7 +72,6 @@ else
     TrueSize = UDim2.new(0.1, 0, 0.1, 0)
 end
 
-
 local NewFrame:Frame = Instance.new("Frame")
 NewFrame.Color = Color4.new("#e81818")
 NewFrame.Name = "Player"

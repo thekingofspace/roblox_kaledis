@@ -182,33 +182,6 @@ function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Pr
         if ExtendMethod["Draw"] then
             ExtendMethod["Draw"](self)
         end
-
-        if not RawProperties.Visible or self.Parent == nil then
-            return
-        end
-        
-        local parent = RawProperties.Parent
-        local parentW, parentH = love.graphics.getWidth(), love.graphics.getHeight()
-        local parentX, parentY = 0, 0
-        
-        if type(parent) == "table" and parent.GetAbsolute and parent.GetAbsoluteSize then
-            parentW, parentH = parent:GetAbsoluteSize()
-            local parentAbs = parent:GetAbsolute()
-            parentX = parentAbs.X.Scale * love.graphics.getWidth() + parentAbs.X.Offset
-            parentY = parentAbs.Y.Scale * love.graphics.getHeight() + parentAbs.Y.Offset
-        end
-        
-        local px, py = RawProperties.Position:ToAbsolute(parentW, parentH)
-        local sx, sy = RawProperties.Size:ToAbsolute(parentW, parentH)
-        local ax, ay = RawProperties.Anchorpoint:ToAbsolute(sx, sy)
-        local r, g, b, a = RawProperties.Color:toLove()
-        
-        love.graphics.push()
-        love.graphics.translate(px + parentX, py + parentY)
-        love.graphics.rotate(math.rad(RawProperties.Rotation))
-        love.graphics.setColor(r, g, b, a)
-        love.graphics.rectangle("fill", -ax, -ay, sx, sy)
-        love.graphics.pop()
     end
     
     RawMethods.Destroy = function(self)
@@ -272,7 +245,7 @@ function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Pr
     end
 
     if SuperConstruct then
-        local Properties, Methods = SuperConstruct()
+        local Properties, Methods, Extended = SuperConstruct()
 
         for I, item in ipairs(Properties) do
             RawProperties[item.Property] = item.Value
@@ -295,6 +268,10 @@ function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Pr
 
                 item.Code(self)
             end
+        end
+
+        for I, item in ipairs(Extended) do
+            ExtendMethod[item.Method] = item.Code
         end
     end
 

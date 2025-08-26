@@ -116,7 +116,7 @@ function module.new(InstanceUpdate:Signal, GetID:() -> string, UserInput, SuperC
     end
 
     if SuperConstruct then
-        local Properties, Methods = SuperConstruct()
+        local Properties, Methods, Extended = SuperConstruct()
 
         for I, item in ipairs(Properties) do
             RawProperties[item.Property] = item.Value
@@ -139,6 +139,10 @@ function module.new(InstanceUpdate:Signal, GetID:() -> string, UserInput, SuperC
 
                 item.Code(self)
             end
+        end
+
+        for I, item in ipairs(Extended) do
+            ExtendMethod[item.Method] = item.Code
         end
     end
 
