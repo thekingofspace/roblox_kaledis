@@ -149,6 +149,7 @@ export type Mouse = {
     Y: number,
     Type: string,
     SetIcon: (self: Mouse, Icon: CursorTypes) -> (),
+    SetVisible: (self: Mouse, Visible:boolean) -> nil
 }
 
 export type UserInputService = {

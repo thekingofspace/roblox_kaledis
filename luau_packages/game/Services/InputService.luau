@@ -15,7 +15,11 @@ local Mouse = {
 local MouseMethods = {
     SetIcon = function(self, Icon:CursorTypes)
         love.mouse.setCursor(love.mouse.getSystemCursor(Icon))
-        Mouse.Type = "arrow"
+        Mouse.Type = Icon
+    end,
+
+    SetVisible = function(self, isVisible:boolean)
+        love.mouse.setVisible(isVisible)
     end
 }
 
