@@ -254,11 +254,9 @@ function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Pr
         local function recurse(children)
             for _, child in ipairs(children) do
                 table.insert(Descendants, child)
-                if child.GetChildren then
-                    local childChildren = child:GetChildren()
-                    if #childChildren > 0 then
-                        recurse(childChildren)
-                    end
+                local childChildren = child:GetChildren()
+                if #childChildren > 0 then
+                    recurse(childChildren)
                 end
             end
         end
