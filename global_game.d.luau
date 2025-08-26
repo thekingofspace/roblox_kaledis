@@ -119,8 +119,8 @@ export type UI_2D = Instance & {
     SinkInputs:boolean;
     HoverBegan:ReadOnlySignal<>;
     HoverEnded:ReadOnlySignal<>;
-    MouseClick:ReadOnlySignal<>;
-    MouseClickRelease:ReadOnlySignal<>;
+    MouseClick:ReadOnlySignal<string>;
+    MouseClickRelease:ReadOnlySignal<string>;
     Modifiers:{};
 
     GetAbsolute:(self:UI_2D) -> UDim2;
