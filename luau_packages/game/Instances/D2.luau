@@ -55,19 +55,6 @@ local function CheckType(id, value, properties)
     end
 end
 
-export type Property = {
-    Property: string,
-    Type: string | {string},
-    Value: any,
-    WriteTransform: ((self: any, OldValue: any) -> ...any)?,
-    ReadTransform: ((self: any, OldValue: any) -> any)?,
-}
-
-export type Method = {
-    Method: string,
-    Code: (self: any, ...any) -> ...any,
-}
-
 function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Property}, {Method}, {Method}))?)
     local Changed = Signal.CreateSignal()
     local Touched = Signal.CreateSignal()
@@ -268,7 +255,10 @@ function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Pr
             for _, child in ipairs(children) do
                 table.insert(Descendants, child)
                 if child.GetChildren then
-                    recurse(child:GetChildren())
+                    local childChildren = child:GetChildren()
+                    if #childChildren > 0 then
+                        recurse(childChildren)
+                    end
                 end
             end
         end
