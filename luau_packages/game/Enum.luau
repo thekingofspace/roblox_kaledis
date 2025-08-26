@@ -2,20 +2,6 @@
 -- when adding new new enums you likely will need to update the global_game.d.luau in order to add type checking to them.
 
 return {
-    StartupRatios = {
-        ["800x600"]   = {X = 800, Y = 600},     
-        ["1024x768"]  = {X = 1024, Y = 768},   
-        ["1280x960"]  = {X = 1280, Y = 960},   
-        ["1600x1200"] = {X = 1600, Y = 1200},  
-        ["1280x1024"] = {X = 1280, Y = 1024},  
-        ["1400x1050"] = {X = 1400, Y = 1050},  
-        ["1440x900"]  = {X = 1440, Y = 900},   
-        ["1680x1050"] = {X = 1680, Y = 1050},  
-        ["1600x900"]  = {X = 1600, Y = 900},   
-        ["1920x1080"] = {X = 1920, Y = 1080},  
-        ["2560x1440"] = {X = 2560, Y = 1440},  
-        ["3840x2160"] = {X = 3840, Y = 2160},  
-    },
     KeyCodes = {
         a = "a",
         b = "b",
@@ -86,18 +72,18 @@ return {
         ["left"] = "left",
         ["right"] = "right",
 
-        ["-"] = "-",
-        ["="] = "=",
-        ["["] = "[",
-        ["]"] = "]",
-        ["\\"] = "\\",
-        [";"] = ";",
-        ["'"] = "'",
-        [","] = ",",
-        ["."] = ".",
-        ["/"] = "/",
-        ["`"] = "`",
-
+        Minus       = "-",
+        Equals      = "=",
+        LeftBracket = "[",
+        RightBracket= "]",
+        Backslash   = "\\",
+        Semicolon   = ";",
+        Apostrophe  = "'",
+        Comma       = ",",
+        Period      = ".",
+        Slash       = "/",
+        Backtick    = "`",
+        
         f1 = "f1",
         f2 = "f2",
         f3 = "f3",

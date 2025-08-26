@@ -7,6 +7,8 @@ local RunService:RunService = game:GetService("RunService")
 
 local DataStoreService:DatastoreService = game:GetService("Datastore")
 
+local DesktopService:DesktopService  = game:GetService("DesktopService")
+
 
 local _ExtendedLove = require("@packages/ExtendedLove")
 
@@ -182,7 +184,7 @@ UserInput.InputTick:Connect(function(Keys)
     end
 end)
 
-UserInput.InputBegan:Connect(function(KeyCode:KeyCode)
+UserInput.InputBegan:Connect(function(KeyCode:KeyCode, ScanCode:number)
     if KeyCode == Enum.KeyCodes.q then
         NewFrame.Size += UDim2.new(0.05, 0, 0.05, 0)
     elseif KeyCode == Enum.KeyCodes.e then
@@ -194,10 +196,9 @@ game:BindToClose(function()
     Section:SetAsync("PositionData", {X = NewFrame.Position.X.Scale, Y = NewFrame.Position.Y.Scale, XS = NewFrame.Size.X.Scale, YS = NewFrame.Size.Y.Scale })
 end)
 
-_task.delay(5,function()
-    print(game:Raycast(UDim2.new(0.5, 0, 0.5, 0), UDim2.new(0, 0, 1, 0), 1000))
-end)
 
 RunService.RenderStep:Connect(function()
     NewFrame.Rotation += 1
 end)
+
+DesktopService:SetWindowName("Guh")

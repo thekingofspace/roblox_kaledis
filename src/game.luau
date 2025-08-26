@@ -2,7 +2,7 @@ local module = {
     Workspace = "Workspace";
 }
 
-type Services = "EncoderService" | "RunService" | "Datastore" | "Settings" | "UserInputService"
+type Services = "EncoderService" | "RunService" | "Datastore" | "Settings" | "UserInputService" | "DesktopService"
 
 local Enum = require("@game/Enum")
 local Signal = require("@game/signal")
@@ -18,6 +18,7 @@ local RunService = require("@game/Services/RunService")
 local Datastore = require("@game/Services/DataStore")
 local Settings = require("@game/Services/Settings")
 local UInput = require("@game/Services/InputService")
+local Desktop = require("@game/Services/DesktopService")
 
 local InitData = {
     RenderStep = Signal.CreateSignal();
@@ -36,6 +37,7 @@ local Services = {
     Datastore = Datastore;
     Settings = Settings;
     UserInputService = UInput;
+    DesktopService = Desktop
 }
 
 for _, service in pairs(Services) do
@@ -92,14 +94,14 @@ local MouseButtonNames = {
 
 local keysDown = {}
 
-function love.keypressed(key)
+function love.keypressed(key, ScanCode)
     keysDown[key] = true
-    InitData.InputBegan:Fire(key)
+    InitData.InputBegan:Fire(key, ScanCode)
 end
 
-function love.keyreleased(key)
+function love.keyreleased(key, ScanCode)
     keysDown[key] = nil
-    InitData.InputEnded:Fire(key)
+    InitData.InputEnded:Fire(key, ScanCode)
 end
 
 local QuitCode = nil
@@ -682,6 +684,10 @@ function module:Raycast(Origin: UDim2, Direction: UDim2, MaxDistance: number?, I
     local endX = startX + dirX * MaxDistance
     local endY = startY + dirY * MaxDistance
     return nil, endX, endY, MaxDistance, nil
+end
+
+function module:Quit()
+    love.event.quit(1)
 end
 
 InitData.InstanceUpdate:Connect(function(ID: string, Type: string, Instance)

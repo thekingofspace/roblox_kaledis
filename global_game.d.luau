@@ -56,10 +56,10 @@ export type Signal = {
     Destroy: (self:Signal) -> nil
 }
 
-export type ReadOnlySignal = {
-    Connect: (self: ReadOnlySignal, callback: (...any) -> ()) -> Connection,
-    ConnectAsync: (self: ReadOnlySignal, callback: (...any) -> ()) -> Connection,
-    Wait: (self: ReadOnlySignal, timeout: number?) -> (...any),
+export type ReadOnlySignal<T...> = {
+    Connect: (self: ReadOnlySignal<T...>, callback: (T...) -> ()) -> Connection,
+    ConnectAsync: (self: ReadOnlySignal<T...>, callback: (T...) -> ()) -> Connection,
+    Wait: (self: ReadOnlySignal<T...>, timeout: number?) -> (T...),
 }
 
 export type Encode_Service = {
@@ -73,8 +73,8 @@ export type Encode_Service = {
 }
 
 export type RunService = {
-    RenderStep: ReadOnlySignal;
-    Heartbeat:ReadOnlySignal
+    RenderStep: ReadOnlySignal<number>;
+    Heartbeat:ReadOnlySignal<>
 }
 
 export type DatastoreService = {
@@ -106,8 +106,8 @@ export type Instance = {
 export type UI_2D = Instance & {
     Parent: string | Instance? | nil,
     Visible:boolean;
-    TouchStarted:ReadOnlySignal;
-    TouchEnded:ReadOnlySignal;
+    TouchStarted:ReadOnlySignal<UI_2D>;
+    TouchEnded:ReadOnlySignal<UI_2D>;
     Size:UDim2;
     Position:UDim2;
     Position:UDim2;
@@ -117,10 +117,10 @@ export type UI_2D = Instance & {
     ZIndex:number;
     CanQuery:boolean;
     SinkInputs:boolean;
-    HoverBegan:ReadOnlySignal;
-    HoverEnded:ReadOnlySignal;
-    MouseClick:ReadOnlySignal;
-    MouseClickRelease:ReadOnlySignal;
+    HoverBegan:ReadOnlySignal<>;
+    HoverEnded:ReadOnlySignal<>;
+    MouseClick:ReadOnlySignal<>;
+    MouseClickRelease:ReadOnlySignal<>;
     Modifiers:{};
 
     GetAbsolute:(self:UI_2D) -> UDim2;
@@ -152,12 +152,13 @@ export type Mouse = {
 }
 
 export type UserInputService = {
-    InputBegan: ReadOnlySignal,
-    InputEnded: ReadOnlySignal,
-    MouseMoved: ReadOnlySignal,
-    InputTick:ReadOnlySignal,
+    InputBegan: ReadOnlySignal<string, number>,
+    InputEnded: ReadOnlySignal<string, number>,
+    MouseMoved: ReadOnlySignal<number,  number>,
+    InputTick:ReadOnlySignal<{string}>,
     IsKeyDown: (self: UserInputService, Keycode: KeyCode) -> boolean,
     GetMouse: (self: UserInputService) -> Mouse,
+    GetKeyCode:(self: UserInputService, ScanCode:number) -> KeyCode
 }
 
 export type Property = {
@@ -171,4 +172,39 @@ export type Property = {
 export type Method = {
     Method: string,
     Code: (self: any, ...any) -> ...any,
+}
+
+export type WindowOptions = {
+    width: number?,
+    height: number?,
+    fullscreen: boolean?,
+    borderless: boolean?,
+    resizable: boolean?,
+    vsync: boolean?,
+    msaa: number?,
+    title: string?,
+}
+
+export type CurrentMode = {
+    width: number,
+    height: number,
+    fullscreen: boolean,
+    borderless: boolean,
+    resizable: boolean,
+    vsync: boolean,
+    msaa: number,
+    title: string,
+}
+
+export type DesktopService = {
+    CurrentMode: CurrentMode,
+
+    Resized: ReadOnlySignal<number,  number>?,
+
+    SetWindow: (self: DesktopService, options: WindowOptions?) -> (),
+    HandleResize: (self: DesktopService, w: number, h: number) -> (),
+    FullScreen: (self: DesktopService, Active: boolean) -> (),
+    GetWindowSize: (self: DesktopService) -> (number, number),
+    SetWindowName: (self: DesktopService, Name: string) -> (),
+    SetIcon: (self: DesktopService, Icon: any) -> (),
 }

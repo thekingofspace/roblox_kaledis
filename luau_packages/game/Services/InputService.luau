@@ -4,6 +4,7 @@ local InitModule = {}
 local module = {}
 
 local Signal = require("@game/signal")
+local Enum = require("@game/Enum")
 
 local Mouse = {
     X = 0,
@@ -36,6 +37,28 @@ end
 
 function module:IsKeyDown(Keycode:KeyCode):boolean
     return love.keyboard.isDown(Keycode)
+end
+
+local KeyCodes = {
+    ["-"] = "Minus",
+    ["="] = "Equals",
+    ["["] = "LeftBracket",
+    ["]"] = "RightBracket",
+    ["\\"] = "Backslash",
+    [";"] = "Semicolon",
+    ["'"] = "Apostrophe",
+    [","] = "Comma",
+    ["."] = "Period",
+    ["/"] = "Slash",
+    ["`"] = "Backtick"
+}
+
+function module:GetKeyCode(ScanCode:number)
+    if Enum.KeyCodes[love.keyboard.getKeyFromScancode(ScanCode)] then
+        return Enum.KeyCodes[love.keyboard.getKeyFromScancode(ScanCode)]
+    else
+        return Enum.KeyCodes[KeyCodes[love.keyboard.getKeyFromScancode(ScanCode)]]
+    end
 end
 
 function module:GetMouse()
