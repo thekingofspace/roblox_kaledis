@@ -121,6 +121,7 @@ export type UI_2D = Instance & {
     HoverEnded:ReadOnlySignal;
     MouseClick:ReadOnlySignal;
     MouseClickRelease:ReadOnlySignal;
+    Modifiers:{};
 
     GetAbsolute:(self:Frame) -> UDim2;
     GetAbsoluteSize:(self:Frame) -> UDim2;

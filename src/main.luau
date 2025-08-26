@@ -94,13 +94,13 @@ local Mouse = UserInput:GetMouse()
 
 NewFrame.MouseClick:Connect(function(Key)
     if Enum.KeyCodes[Key] == Enum.KeyCodes.mouse_right then
-        print("Ran")
+        print("Ran Right")
     end
 end)
 
 NewFrame.MouseClickRelease:Connect(function(Key)
     if Enum.KeyCodes[Key] == Enum.KeyCodes.mouse_left then
-        print("Ran")
+        print("Ran Left")
     end
 end)
 
@@ -130,10 +130,10 @@ local moveSpeed = 0.005
 UserInput.InputTick:Connect(function(Keys)
     local deltaX, deltaY = 0, 0
 
-    if UserInput:IsKeyDown(Enum.KeyCodes.w) then deltaY -= 1 end
-    if UserInput:IsKeyDown(Enum.KeyCodes.s) then deltaY += 1 end
-    if UserInput:IsKeyDown(Enum.KeyCodes.a) then deltaX -= 1 end
-    if UserInput:IsKeyDown(Enum.KeyCodes.d) then deltaX += 1 end
+    if UserInput:IsKeyDown(Config:Get("Keybinds", "Forward")) then deltaY -= 1 end
+    if UserInput:IsKeyDown(Config:Get("Keybinds", "Back")) then deltaY += 1 end
+    if UserInput:IsKeyDown(Config:Get("Keybinds", "Left")) then deltaX -= 1 end
+    if UserInput:IsKeyDown(Config:Get("Keybinds", "Right")) then deltaX += 1 end
 
     if deltaX ~= 0 or deltaY ~= 0 then
         local length = math.sqrt(deltaX^2 + deltaY^2)

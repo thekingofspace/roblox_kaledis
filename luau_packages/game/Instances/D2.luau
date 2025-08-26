@@ -33,32 +33,8 @@ local RealProperties = {
     MouseClick_Private = "frozen",
     MouseClickRelease_Private = "frozen";
     MouseClickRelease = "frozen";
-    SinkInputs = "boolean"
-}
-
-local PropertyTransform = {
-    Parent = function(_, value)
-        if typeof(value) == "table" and value.Draw ~= nil then
-            return value
-        elseif value == "Workspace" or value == nil then
-            return value or "nil"
-        end
-        return nil
-    end
-}
-
-local ReadTransform = {
-    Parent = function(_, value)
-        if value == "nil" then
-            return nil
-        else
-            return value
-        end
-    end
-}
-
-local ExtendMethod = {
-
+    SinkInputs = "boolean";
+    Modifiers = "table"
 }
 
 local function CheckType(id, value, properties)
@@ -90,6 +66,7 @@ export type Method = {
     Method: string,
     Code: (self: any, ...any) -> ...any,
 }
+
 function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Property}, {Method}, {Method}))?)
     local Changed = Signal.CreateSignal()
     local Touched = Signal.CreateSignal()
@@ -100,6 +77,31 @@ function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Pr
     local MouseClick_release = Signal.CreateSignal()
     local UID = GetID()
     local self = {}
+    
+    local PropertyTransform = {
+        Parent = function(_, value)
+            if typeof(value) == "table" and value.Draw ~= nil then
+                return value
+            elseif value == "Workspace" or value == nil then
+                return value or "nil"
+            end
+            return nil
+        end
+    }
+
+    local ReadTransform = {
+        Parent = function(_, value)
+            if value == "nil" then
+                return nil
+            else
+                return value
+            end
+        end
+    }
+
+    local ExtendMethod = {
+
+    }
     
     local PropertyTypes = RealProperties
 
@@ -124,6 +126,7 @@ function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Pr
         Destroyed = false,
         CanQuery = true,
         SinkInputs = true;
+        Modifiers = {}; 
 
         HoverBegan = Signal.CreateReadOnlySignal(HoverBegan),
         HoverEnded = Signal.CreateReadOnlySignal(HoverEnded),
@@ -226,6 +229,10 @@ function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Pr
         MouseClick:Destroy()
         MouseClick_release:Destroy()
 
+        table.clear(ReadTransform)
+        table.clear(PropertyTransform)
+        table.clear(ExtendMethod)
+        
         HoverBegan = nil
         HoverEnded = nil
         MouseClick = nil

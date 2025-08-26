@@ -19,7 +19,7 @@ local function CheckType(ID: string, Value, Properties)
     end
 end
 
-local PropertyTypes = {
+local RealProperties = {
         Name = "string";
         ClassName = "frozen",
         Changed = "frozen",
@@ -28,18 +28,36 @@ local PropertyTypes = {
         Destroyed = "frozen"
 }
 
-local PropertyTransform = {
-
+export type Property = {
+    Property: string,
+    Type: string | {string},
+    Value: any,
+    WriteTransform: ((self: any, OldValue: any) -> ...any)?,
+    ReadTransform: ((self: any, OldValue: any) -> any)?,
 }
 
-local ReadTransform = {
-
+export type Method = {
+    Method: string,
+    Code: (self: any, ...any) -> ...any,
 }
 
-function module.new(InstanceUpdate:Signal, GetID:() -> string, UserInput)
+function module.new(InstanceUpdate:Signal, GetID:() -> string, UserInput, SuperConstruct:(() -> ({Property}, {Method}, {Method}))?)
     local Changed = Signal.CreateSignal()
-
+    local self = {}
+    local PropertyTypes = RealProperties
     local UID = GetID()
+
+    local PropertyTransform = {
+
+    }
+
+    local ReadTransform = {
+
+    }
+
+    local ExtendMethod = {
+
+    }
 
     local RawProperties = {
         Name = "Class",
@@ -56,10 +74,16 @@ function module.new(InstanceUpdate:Signal, GetID:() -> string, UserInput)
     end
 
     RawMethods.Draw = function(self)
-        
+        if ExtendMethod["Draw"] then
+            ExtendMethod["Draw"](self)
+        end
     end
 
     RawMethods.Clone = function(self)
+        if ExtendMethod["Clone"] then
+            ExtendMethod["Clone"](self)
+        end
+
         local clone = module.new(InstanceUpdate, GetID, UserInput)
 
         for k, v in pairs(RawProperties) do
@@ -72,16 +96,52 @@ function module.new(InstanceUpdate:Signal, GetID:() -> string, UserInput)
     end
 
     RawMethods.Destroy = function(self)
+        if ExtendMethod["Destroy"] then
+            ExtendMethod["Destroy"](self)
+        end
+
         InstanceUpdate:Fire(UID, "Destroy", self)
         Changed:Destroy()
         table.clear(RawProperties)
         table.clear(RawMethods)
+        table.clear(PropertyTypes)
+        table.clear(ReadTransform)
+        table.clear(PropertyTransform)
+        table.clear(ExtendMethod)
+
         Changed = nil
         UID = nil
         RawProperties.Destroyed = true
+        PropertyTypes.Destroyed = "boolean"
     end
 
-    local self = {}
+    if SuperConstruct then
+        local Properties, Methods = SuperConstruct()
+
+        for I, item in ipairs(Properties) do
+            RawProperties[item.Property] = item.Value
+            PropertyTypes[item.Property] = item.Type
+
+            if item.ReadTransform then
+                ReadTransform[item.Property] = item.ReadTransform
+            end
+
+            if item.WriteTransform then
+                PropertyTransform[item.Property] = item.WriteTransform
+            end
+        end
+
+        for I, item in ipairs(Methods) do
+            RawMethods[item.Method] = function()
+                if ExtendMethod[item.Method] then
+                    ExtendMethod[item.Method](self)
+                end
+
+                item.Code(self)
+            end
+        end
+    end
+
     local mt = {}
 
     mt.__index = function(_, index)
