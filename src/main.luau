@@ -203,7 +203,7 @@ end)
 task.spawn(function()
     task.wait(5)
     while true do
-        local Tween  =  TweenSerive:Create(NewFrame, 6, Enum.EasingStyles.Back, Enum.EasingDirections.In, {Color = Color4.new("#7d74fa"), Rotation =  360})
+        local Tween  =  TweenSerive:Create(NewFrame, 6, Enum.EasingStyles.Elastic, Enum.EasingDirections.In, {Color = Color4.new("#7d74fa"), Rotation =  360})
         Tween:Play()
         Tween.Completed:Wait()
         NewFrame.Rotation = 0

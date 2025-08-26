@@ -103,8 +103,12 @@ export type Instance = {
     GetAttribute:(self:Instance, Name:string) -> any
 }
 
+export type Modifier = Instance $ {
+    Type:"Size" | "Position" | "Modulation" | "Shader";
+}
+
 export type Sound =  Instance & {
-    Modifier:{};
+    Modifier:{Modifier};
     Stopped:ReadOnlySignal<>;
     TimePosition:number;
     Length:number;
@@ -136,7 +140,7 @@ export type UI_2D = Instance & {
     HoverEnded:ReadOnlySignal<>;
     MouseClick:ReadOnlySignal<string>;
     MouseClickRelease:ReadOnlySignal<string>;
-    Modifiers:{};
+    Modifiers:{Modifier};
 
     GetAbsolute:(self:UI_2D) -> UDim2;
     GetAbsoluteSize:(self:UI_2D) -> (number, number);
