@@ -42,6 +42,11 @@ for I, item in pairs(Values) do
     end
 end
 
+local Sound:Sound  = Instance.new("Sound")
+
+Sound.Sound = "sounds/On.wav"
+
+Sound.Looped  = true
 
 local function createWall(name, size, position, color)
     local wall:Frame = Instance.new("Frame")
@@ -97,12 +102,14 @@ local Mouse = UserInput:GetMouse()
 NewFrame.MouseClick:Connect(function(Key)
     if Enum.KeyCodes[Key] == Enum.KeyCodes.mouse_right then
         print("Ran Right")
+        Sound:Play()
     end
 end)
 
 NewFrame.MouseClickRelease:Connect(function(Key)
     if Enum.KeyCodes[Key] == Enum.KeyCodes.mouse_left then
         print("Ran Left")
+        Sound:Stop()
     end
 end)
 

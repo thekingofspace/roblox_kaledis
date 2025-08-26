@@ -1,6 +1,8 @@
+--!nocheck
 local module = {}
 local Inherited = require("@game/Instances/Inherited")
 local Signal = require("@game/signal")
+local task = require("@game/BuiltIn/Task").module
 
 local function CheckType(ID: string, Value, Properties)
     if Properties[ID] == "frozen" then
@@ -20,31 +22,98 @@ local function CheckType(ID: string, Value, Properties)
 end
 
 local RealProperties = {
-        Name = "string";
-        ClassName = "frozen",
-        Changed = "frozen",
-        ID = "frozen",
-        attributes = "table",
-        Destroyed = "frozen"
+    Name = "string";
+    ClassName = "frozen",
+    Changed = "frozen",
+    ID = "frozen",
+    attributes = "table",
+    Destroyed = "frozen",
+    Sound = "string",
+    Source = "frozen",
+    SoundData = "frozen",
+    TrackerThread = "frozen",
+    Looped = "boolean",
+    IsPlaying = "boolean",
+    Volume = "number",
+    TimePosition = "frozen",
+    Length = "frozen",
+    Thread = "frozen"
 }
 
 function module.new(InstanceUpdate:Signal, GetID:() -> string, SuperConstruct:(() -> ({Property}, {Method}, {Method}))?)
     local Changed = Signal.CreateSignal()
+    local Stopped = Signal.CreateSignal()
     local self = {}
     local PropertyTypes = RealProperties
     local UID = GetID()
 
     local RawProperties = {
-        Name = "Class",
-        ClassName = "Class",
+        Name = "Sound",
+        ClassName = "Sound",
         Changed = Signal.CreateReadOnlySignal(Changed),
+        Stopped = Signal.CreateReadOnlySignal(Stopped),
         ID = UID,
         attributes = {},
-        Destroyed = false
+        Destroyed = false,
+
+        ---- PRIVATE
+        Source = "null",
+        SoundData = "null",
+        TimePosition = 0,
+        Length = 0,
+
+        ---- PUBLIC
+        Sound = "",
+        Looped = false,
+        IsPlaying = false,
+        Volume = 0.5,
+
+        Thread = nil
     }
 
     local PropertyTransform = {
+        Sound  = function(self, Value)
+            if RawProperties.Source == "null" then
+                RawProperties.SoundData = love.sound.newSoundData("assets/" .. Value)
 
+                RawProperties.Source = love.audio.newSource(RawProperties.SoundData)
+                RawProperties.Source:setVolume(0.5)
+
+                RawProperties.Length = RawProperties.SoundData:getDuration()
+            else
+                RawProperties.Source:stop()
+                RawProperties.SoundData:release()
+                RawProperties.Source:release()
+
+                RawProperties.SoundData = love.sound.newSoundData("assets/" .. Value)
+
+                RawProperties.Source = love.audio.newSource(RawProperties.SoundData)
+
+                RawProperties.Length = RawProperties.SoundData:getDuration()
+            end
+
+            return Value
+        end,
+
+        Looped = function(self, Value)
+            if RawProperties.Source ~= "null" then
+                RawProperties.Source:setLooping(Value)
+            else
+                return false
+            end
+
+            return Value
+        end,
+
+        Volume = function(self, Value)
+            if RawProperties.Source ~= "null" then
+                RawProperties.Source:setVolume(Value)
+            else
+                return 0.5
+            end
+
+            return Value
+        end
     }
 
     local ReadTransform = {
@@ -54,6 +123,7 @@ function module.new(InstanceUpdate:Signal, GetID:() -> string, SuperConstruct:((
     local ExtendMethod = {
 
     }
+    
 
     local RawMethods = {}
     for k, v in pairs(Inherited) do
@@ -82,6 +152,44 @@ function module.new(InstanceUpdate:Signal, GetID:() -> string, SuperConstruct:((
         return clone
     end
 
+    RawMethods.Play = function(self)
+        if RawProperties.Sound ~= "" then
+
+            if RawProperties.Source:isPlaying() == true then
+                RawMethods.Stop(self)
+            end
+
+            RawProperties.Thread = task.spawn(function()
+                RawProperties.Source:play()
+                RawProperties.IsPlaying = true
+
+                while true do
+                    task.wait(1)
+                    RawProperties.TimePosition = RawProperties.Source:tell()
+
+                    if RawProperties.Source:isPlaying() == false then
+                        break
+                    end
+                end
+                
+                RawProperties.TimePosition = 0
+                RawProperties.IsPlaying = false
+                Stopped:Fire()
+            end)
+        end
+    end
+
+    RawMethods.Stop = function(self)
+        if RawProperties.Sound ~= "" and RawProperties.Thread ~= nil then
+            task.cancel(RawProperties.Thread)
+            RawProperties.IsPlaying = false
+            RawProperties.TimePosition = 0
+            RawProperties.Source:stop()
+            Stopped:Fire()
+        end
+    end
+
+
     RawMethods.Destroy = function(self)
         if ExtendMethod["Destroy"] then
             ExtendMethod["Destroy"](self)
@@ -89,6 +197,7 @@ function module.new(InstanceUpdate:Signal, GetID:() -> string, SuperConstruct:((
 
         InstanceUpdate:Fire(UID, "Destroy", self)
         Changed:Destroy()
+        Stopped:Destroy()
         table.clear(RawProperties)
         table.clear(RawMethods)
         table.clear(PropertyTypes)
@@ -97,6 +206,7 @@ function module.new(InstanceUpdate:Signal, GetID:() -> string, SuperConstruct:((
         table.clear(ExtendMethod)
 
         Changed = nil
+        Stopped = nil
         UID = nil
         RawProperties.Destroyed = true
         PropertyTypes.Destroyed = "boolean"

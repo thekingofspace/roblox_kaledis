@@ -2,8 +2,8 @@ local D2 = require("@game/Instances/D2")
 
 local module = {}
 
-function module.new(InstanceUpdate: Signal, GetID: () -> string, UserInput)
-    return D2.new(InstanceUpdate, GetID, UserInput, function()
+function module.new(InstanceUpdate: Signal, GetID: () -> string)
+    return D2.new(InstanceUpdate, GetID, function()
         local RawProperty: {Property} = {}
         local Methods: {Method} = {}
         local ExtendedMethods: {Method} = {}

@@ -18,7 +18,7 @@ export type CursorTypes =
     | "hresize"
     | "vresize";
 
-export type Instances = "Frame"
+export type Instances = "Frame" | "Sound"
 
 export type Color4 = {
     r: number,
@@ -102,6 +102,21 @@ export type Instance = {
     SetAttribute:(self:Instance, Name:string, Value:any) -> nil,
     GetAttribute:(self:Instance, Name:string) -> any
 }
+
+export type Sound =  Instance & {
+    Modifier:{};
+    Stopped:ReadOnlySignal<>;
+    TimePosition:number;
+    Length:number;
+    Sound:string;
+    Looped:boolean;
+    IsPlaying:boolean;
+    Volume:number;
+
+    Play:(self:Sound) ->  nil;
+    Stop:(self:Sound) -> nil
+}
+
 
 export type UI_2D = Instance & {
     Parent: string | Instance? | nil,

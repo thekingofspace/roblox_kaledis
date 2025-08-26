@@ -65,7 +65,7 @@ local function generateNumericId()
     return id
 end
 
-Instance.Init.Build(InitData, generateNumericId, UInput.module)
+Instance.Init.Build(InitData, generateNumericId)
 
 function module:GetCommonElements()
     return Color4, Enum, Udim.UDim, Udim.UDim2, Task.module, Instance.module

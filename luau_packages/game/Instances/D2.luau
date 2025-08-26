@@ -55,7 +55,7 @@ local function CheckType(id, value, properties)
     end
 end
 
-function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Property}, {Method}, {Method}))?)
+function module.new(InstanceUpdate, GetID, SuperConstruct:(() -> ({Property}, {Method}, {Method}))?)
     local Changed = Signal.CreateSignal()
     local Touched = Signal.CreateSignal()
     local TouchedStarted = Signal.CreateSignal()
@@ -270,7 +270,7 @@ function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Pr
             ExtendMethod["Clone"](self)
         end
 
-        local clone = module.new(InstanceUpdate, GetID, UserInput, SuperConstruct)
+        local clone = module.new(InstanceUpdate, GetID, SuperConstruct)
         for k, v in pairs(RawProperties) do
             if PropertyTypes[k] ~= "frozen" then
                 clone[k] = v
