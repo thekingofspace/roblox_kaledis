@@ -35,6 +35,7 @@ function module.new(InstanceUpdate: Signal, GetID: () -> string, UserInput)
             Value = "Frame"
         })
 
+
         table.insert(ExtendedMethods, {
             Method = "Draw",
             Code = function(self:Frame)
@@ -45,12 +46,20 @@ function module.new(InstanceUpdate: Signal, GetID: () -> string, UserInput)
                 local parent = self.Parent
                 local parentW, parentH = love.graphics.getWidth(), love.graphics.getHeight()
                 local parentX, parentY = 0, 0
+                local totalRotation = self.Rotation
                 
                 if type(parent) == "table" and parent.GetAbsolute and parent.GetAbsoluteSize then
                     parentW, parentH = parent:GetAbsoluteSize()
                     local parentAbs = parent:GetAbsolute()
                     parentX = parentAbs.X.Scale * love.graphics.getWidth() + parentAbs.X.Offset
                     parentY = parentAbs.Y.Scale * love.graphics.getHeight() + parentAbs.Y.Offset
+                    
+                    local ancestors = self:GetAncestors()
+                    for i = 1, #ancestors do
+                        if ancestors[i].Rotation then
+                            totalRotation = totalRotation + ancestors[i].Rotation
+                        end
+                    end
                 end
                 
                 local px, py = self.Position:ToAbsolute(parentW, parentH)
@@ -60,7 +69,7 @@ function module.new(InstanceUpdate: Signal, GetID: () -> string, UserInput)
                 
                 love.graphics.push()
                 love.graphics.translate(px + parentX, py + parentY)
-                love.graphics.rotate(math.rad(self.Rotation))
+                love.graphics.rotate(math.rad(totalRotation))
                 love.graphics.setColor(r, g, b, a)
                 love.graphics.rectangle("fill", -ax, -ay, sx, sy)
                 love.graphics.pop()

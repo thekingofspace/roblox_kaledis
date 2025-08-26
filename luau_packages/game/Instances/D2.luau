@@ -229,6 +229,19 @@ function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Pr
         end
         return false
     end
+
+    RawMethods.GetAncestors = function(self)
+        local Ancestors = {}
+        local  LastAncestor = self.Parent
+        while true do
+            table.insert(Ancestors, LastAncestor)
+            if typeof(LastAncestor)  ~= "table" then
+                return Ancestors
+            end
+
+            LastAncestor = LastAncestor.Parent
+        end
+    end
     
     RawMethods.Clone = function(self)
         if ExtendMethod["Clone"] then

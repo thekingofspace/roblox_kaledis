@@ -123,9 +123,10 @@ export type UI_2D = Instance & {
     MouseClickRelease:ReadOnlySignal;
     Modifiers:{};
 
-    GetAbsolute:(self:Frame) -> UDim2;
-    GetAbsoluteSize:(self:Frame) -> UDim2;
-    IsDescendantOf:(self:Frame, Target:Instance?) -> boolean
+    GetAbsolute:(self:UI_2D) -> UDim2;
+    GetAbsoluteSize:(self:UI_2D) -> UDim2;
+    IsDescendantOf:(self:UI_2D, Target:Instance?) -> boolean;
+    GetAncestors:(self:UI_2D) -> {UI_2D}
 }
 
 export type Frame = UI_2D

@@ -3,6 +3,7 @@ local Color4, Enum, _UDim, UDim2, _task, Instance = game:GetCommonElements()
 
 local Settings:SettingsService = game:GetService("Settings")
 local UserInput:UserInputService = game:GetService("UserInputService")
+local RunService:RunService = game:GetService("RunService")
 
 local DataStoreService:DatastoreService = game:GetService("Datastore")
 
@@ -191,4 +192,8 @@ end)
 
 game:BindToClose(function()
     Section:SetAsync("PositionData", {X = NewFrame.Position.X.Scale, Y = NewFrame.Position.Y.Scale, XS = NewFrame.Size.X.Scale, YS = NewFrame.Size.Y.Scale })
+end)
+
+RunService.RenderStep:Connect(function()
+    NewFrame.Rotation += 1
 end)
