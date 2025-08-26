@@ -11,7 +11,7 @@ Provides familiar Roblox-like services, signals, and instances for use inside a 
 
 ## Installation
 Download from the **main** branch.  
-Place it into your project and require it as a module.
+Inside find src. Main will be your script you are editing.
 
 ## Example
 ```lua
