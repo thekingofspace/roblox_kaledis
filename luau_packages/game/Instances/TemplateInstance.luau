@@ -73,6 +73,7 @@ function module.new(InstanceUpdate:Signal, GetID:() -> string, UserInput)
 
     RawMethods.Destroy = function(self)
         InstanceUpdate:Fire(UID, "Destroy", self)
+        Changed:Destroy()
         table.clear(RawProperties)
         table.clear(RawMethods)
         Changed = nil

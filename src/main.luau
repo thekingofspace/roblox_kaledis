@@ -1,10 +1,13 @@
 local game = require("./game")
-local Color4, Enum, _UDim, UDim2, task, Instance = game:GetCommonElements()
+local Color4, Enum, _UDim, UDim2, _task, Instance = game:GetCommonElements()
 
 local Settings:SettingsService = game:GetService("Settings")
 local UserInput:UserInputService = game:GetService("UserInputService")
 
 local DataStoreService:DatastoreService = game:GetService("Datastore")
+
+
+local _ExtendedLove = require("@packages/ExtendedLove")
 
 local Section = DataStoreService:GetDataStore("Position")
 
@@ -80,23 +83,12 @@ NewFrame.ZIndex = 1
 NewFrame.Parent = game.Workspace
 NewFrame.Visible = true
 
-local Debounce = false
+NewFrame.TouchStarted:Connect(function(B:UI_2D?)
+    NewFrame.Color = Color4.new("3fb335")
+end)
 
-NewFrame.Touched:Connect(function(B:Instance?)
-
-    if Debounce ~= true then
-        Debounce = true
-
-        task.defer(function()
-           NewFrame.Color = Color4.new("3fb335")
-
-            task.wait(0.2)
-
-            NewFrame.Color = Color4.new("#e81818")
-
-           Debounce = false
-        end)
-    end
+NewFrame.TouchEnded:Connect(function(B:UI_2D?)
+    NewFrame.Color = Color4.new("#e81818")
 end)
 
 local TestFrame:Frame = NewFrame:Clone()
@@ -177,5 +169,3 @@ end)
 game:BindToClose(function()
     Section:SetAsync("PositionData", {X = NewFrame.Position.X.Scale, Y = NewFrame.Position.Y.Scale, XS = NewFrame.Size.X.Scale, YS = NewFrame.Size.Y.Scale })
 end)
-
-local ExtendedLove = require("@packages/ExtendedLove")

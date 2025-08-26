@@ -1,18 +1,5 @@
 local module = {}
 
-export type Connection = {
-    Callback: (...any) -> (),
-    IsConnected: boolean,
-    Disconnect: (self: Connection) -> (),
-}
-
-export type Signal = {
-    Connect: (self: Signal, Callback: (...any) -> ()) -> Connection,
-    ConnectAsync: (self: Signal, Callback: (...any) -> ()) -> Connection,
-    Wait: (self: Signal, timeout: number?) -> ...any,
-    Fire: (self: Signal, ...any) -> (),
-}
-
 function module.CreateSignal()
     local self = {}
     local SyncConnections = {}
@@ -20,8 +7,10 @@ function module.CreateSignal()
     local WaitingThreads = {}
     self.Constructor = nil
     self.WasConnected = false
+    self._Destroyed = false
 
     function self:Connect(Callback: (...any) -> ())
+        assert(not self._Destroyed, "Signal is destroyed")
         assert(typeof(Callback) == "function", "Callback must be a function")
 
         local Connection = {
@@ -39,6 +28,7 @@ function module.CreateSignal()
     end
 
     function self:ConnectAsync(Callback: (...any) -> ())
+        assert(not self._Destroyed, "Signal is destroyed")
         assert(typeof(Callback) == "function", "Callback must be a function")
 
         local Connection = {
@@ -56,10 +46,13 @@ function module.CreateSignal()
     end
 
     function self:AddConstructor(Callback: (...any) -> ...any)
+        assert(not self._Destroyed, "Signal is destroyed")
         self.Constructor = Callback
     end
 
     function self:Wait(timeout: number?)
+        assert(not self._Destroyed, "Signal is destroyed")
+
         local thread = coroutine.running()
         local fired = false
         local result
@@ -104,6 +97,8 @@ function module.CreateSignal()
     end
 
     function self:Fire(...)
+        assert(not self._Destroyed, "Signal is destroyed")
+
         local args = {...}
 
         if self.Constructor then
@@ -135,6 +130,18 @@ function module.CreateSignal()
         if #AsyncConnections == 0 and #SyncConnections == 0 then
             self.WasConnected = false
         end
+    end
+
+    function self:Destroy()
+        if self._Destroyed then return end
+        self._Destroyed = true
+
+        table.clear(SyncConnections)
+        table.clear(AsyncConnections)
+        table.clear(WaitingThreads)
+
+        self.Constructor = nil
+        self.WasConnected = false
     end
 
     return self

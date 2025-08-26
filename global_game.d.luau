@@ -53,6 +53,7 @@ export type Signal = {
     ConnectAsync: (self: Signal, Callback: (...any) -> ()) -> Connection,
     Wait: (self: Signal, timeout: number?) -> ...any,
     Fire: (self: Signal, ...any) -> (),
+    Destroy: (self:Signal) -> nil
 }
 
 export type ReadOnlySignal = {
@@ -102,10 +103,11 @@ export type Instance = {
     GetAttribute:(self:Instance, Name:string) -> any
 }
 
-export type Frame = Instance & {
+export type UI_2D = Instance & {
     Parent: string | Instance? | nil,
     Visible:boolean;
-    Touched:ReadOnlySignal;
+    TouchStarted:ReadOnlySignal;
+    TouchEnded:ReadOnlySignal;
     Size:UDim2;
     Position:UDim2;
     Position:UDim2;
@@ -119,6 +121,8 @@ export type Frame = Instance & {
     GetAbsoluteSize:(self:Frame) -> UDim2;
     IsDescendantOf:(self:Frame, Target:Instance?) -> boolean
 }
+
+export type Frame = UI_2D
 
 export type Setting = {
     Save: (self: Setting) -> nil,

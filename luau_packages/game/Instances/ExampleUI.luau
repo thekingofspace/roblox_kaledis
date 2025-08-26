@@ -21,6 +21,28 @@ function module.new(InstanceUpdate: Signal, GetID: () -> string, UserInput)
         local Methods: {Method} = {}
         local ExtendedMethods: {Method} = {}
 
+        table.insert(RawProperty, {
+            Property = "test";
+            Type = "boolean";
+            Value = true
+        })
+
+        table.insert(Methods, {
+            Method = "Test";
+
+            Code = function(self)
+                print("ran")
+            end
+        })
+
+        table.insert(ExtendedMethods, {
+            Method = "Destroy";
+
+            Code = function(self)
+                print("ran")
+            end
+        })
+
         return RawProperty, Methods, ExtendedMethods
     end)
 end

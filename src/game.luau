@@ -210,7 +210,11 @@ function module:GetItemsInBound(Position:UDim2, Size:UDim2, IgnoreList:{Instance
     return results
 end
 
+local activeCollisions = {}
+
 local function CheckCollisions(drawables)
+    local newCollisions = {}
+
     for i = 1, #drawables do
         local a = drawables[i]
         local ax, ay, aw, ah = GetTruePosition(a)
@@ -230,12 +234,31 @@ local function CheckCollisions(drawables)
                 local bx, by, bw, bh = GetTruePosition(b)
 
                 if RectOverlap(ax, ay, aw, ah, bx, by, bw, bh) then
-                    a.TouchedPrivate:Fire(b)
-                    b.TouchedPrivate:Fire(a)
+                    local key = tostring(a) .. "_" .. tostring(b)
+                    newCollisions[key] = {a, b}
+
+                    if not activeCollisions[key] then
+                        a.TouchedStartedPrivate:Fire(b)
+                        b.TouchedStartedPrivate:Fire(a)
+                    end
                 end
             end
         end
     end
+
+    for key, pair in pairs(activeCollisions) do
+        if not newCollisions[key] then
+            local a, b = pair[1], pair[2]
+            if a.TouchedPrivate then
+                a.TouchedPrivate:Fire(b)
+            end
+            if b.TouchedPrivate then
+                b.TouchedPrivate:Fire(a)
+            end
+        end
+    end
+
+    activeCollisions = newCollisions
 end
 
 function love.draw()
@@ -268,6 +291,7 @@ function love.draw()
     for _, entry in ipairs(drawList) do
         table.insert(onlyObjects, entry.obj)
     end
+
     CheckCollisions(onlyObjects)
 
     for _, entry in ipairs(drawList) do
@@ -275,6 +299,13 @@ function love.draw()
     end
 end
 
+function module:GetType(I:Instance?)
+    if typeof(I) == "table" and I.ClassName then
+        return I.ClassName
+    else
+        return typeof(I)
+    end
+end
 InitData.InstanceUpdate:Connect(function(ID: string, Type: string, Instance)
     Switch({
         Destroy = function(Stop, _, _, _, _, ID: string)
