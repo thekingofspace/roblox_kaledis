@@ -124,7 +124,7 @@ export type UI_2D = Instance & {
     Modifiers:{};
 
     GetAbsolute:(self:UI_2D) -> UDim2;
-    GetAbsoluteSize:(self:UI_2D) -> UDim2;
+    GetAbsoluteSize:(self:UI_2D) -> (number, number);
     IsDescendantOf:(self:UI_2D, Target:Instance?) -> boolean;
     GetAncestors:(self:UI_2D) -> {UI_2D?};
     GetChildren:(self:UI_2D) -> {UI_2D?};
