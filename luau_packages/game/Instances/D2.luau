@@ -91,8 +91,8 @@ function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Pr
     local PropertyTypes = RealProperties
 
     local RawProperties = {
-        Name = "Frame",
-        ClassName = "Frame",
+        Name = "CLASS NAME",
+        ClassName = "CLASS NAME",
         Changed = Signal.CreateReadOnlySignal(Changed),
         TouchEnded = Signal.CreateReadOnlySignal(Touched),
         TouchStarted = Signal.CreateReadOnlySignal(TouchedStarted),

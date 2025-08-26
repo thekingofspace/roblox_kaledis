@@ -21,6 +21,20 @@ function module.new(InstanceUpdate: Signal, GetID: () -> string, UserInput)
         local Methods: {Method} = {}
         local ExtendedMethods: {Method} = {}
 
+        
+        table.insert(RawProperty, {
+            Property = "Name";
+            Type = "string";
+            Value = "Frame"
+        })
+
+        
+        table.insert(RawProperty, {
+            Property = "ClassName";
+            Type = "string";
+            Value = "Frame"
+        })
+
         return RawProperty, Methods, ExtendedMethods
     end)
 end
