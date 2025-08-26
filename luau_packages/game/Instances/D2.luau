@@ -34,7 +34,8 @@ local RealProperties = {
     MouseClickRelease_Private = "frozen";
     MouseClickRelease = "frozen";
     SinkInputs = "boolean";
-    Modifiers = "table"
+    Modifiers = "table";
+    Children = "table"
 }
 
 local function CheckType(id, value, properties)
@@ -79,10 +80,20 @@ function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Pr
     local self = {}
     
     local PropertyTransform = {
-        Parent = function(_, value)
+        Parent = function(self, value)
             if typeof(value) == "table" and value.Draw ~= nil then
+                table.insert(value.Children, self)
                 return value
             elseif value == "Workspace" or value == nil then
+                if typeof(self.Parent) == "table" then
+                    for I, item in ipairs(self.Parent.Children) do
+                        if item == self then
+                            table.remove(self.Parent.Children, I)
+                            break
+                        end
+                    end
+                end
+                
                 return value or "nil"
             end
             return nil
@@ -127,6 +138,7 @@ function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Pr
         CanQuery = true,
         SinkInputs = true;
         Modifiers = {}; 
+        Children = {};
 
         HoverBegan = Signal.CreateReadOnlySignal(HoverBegan),
         HoverEnded = Signal.CreateReadOnlySignal(HoverEnded),
@@ -241,6 +253,26 @@ function module.new(InstanceUpdate, GetID, UserInput, SuperConstruct:(() -> ({Pr
 
             LastAncestor = LastAncestor.Parent
         end
+    end
+
+    RawMethods.GetChildren = function(self)
+        return self.Children
+    end
+
+    RawMethods.GetDescendants = function(self)
+        local Descendants = {}
+
+        local function recurse(children)
+            for _, child in ipairs(children) do
+                table.insert(Descendants, child)
+                if child.GetChildren then
+                    recurse(child:GetChildren())
+                end
+            end
+        end
+
+        recurse(self:GetChildren())
+        return Descendants
     end
     
     RawMethods.Clone = function(self)

@@ -126,7 +126,9 @@ export type UI_2D = Instance & {
     GetAbsolute:(self:UI_2D) -> UDim2;
     GetAbsoluteSize:(self:UI_2D) -> UDim2;
     IsDescendantOf:(self:UI_2D, Target:Instance?) -> boolean;
-    GetAncestors:(self:UI_2D) -> {UI_2D}
+    GetAncestors:(self:UI_2D) -> {UI_2D?};
+    GetChildren:(self:UI_2D) -> {UI_2D?};
+    GetDescendants:(self:UI_2D) -> {UI_2D?};
 }
 
 export type Frame = UI_2D
