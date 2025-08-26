@@ -25,6 +25,4 @@ local UserInputService = game:GetService("UserInputService")
 RunService.Heartbeat:Connect(function(DT:number)
     print("Heartbeat step")
 end)
-
--- Handle in
 ```
