@@ -125,23 +125,141 @@ end
 
 local lastTime = love.timer.getTime()
 
-
- local Data:{string}? = {}
- local pressedInstances = {}
+local Data:{string}? = {}
+local pressedInstances = {}
 
 local function GetTruePosition(Instance)
-
     if not Instance.Position or not Instance.Size or not Instance.Anchorpoint then
-        return Udim.UDim2.new(0,0,0,0)
+        return 0, 0, 0, 0, 0
     end
 
     local px, py = Instance.Position:ToAbsolute(love.graphics.getWidth(), love.graphics.getHeight())
-
     local sx, sy = Instance.Size:ToAbsolute(love.graphics.getWidth(), love.graphics.getHeight())
-
     local ax, ay = Instance.Anchorpoint:ToAbsolute(sx, sy)
+    local rotation = Instance.Rotation or 0
 
-    return px - ax, py - ay, sx, sy
+    return px - ax, py - ay, sx, sy, rotation
+end
+
+local function RotatePoint(px, py, cx, cy, angle)
+    if angle == 0 then
+        return px, py
+    end
+    
+    local cos_a = math.cos(angle)
+    local sin_a = math.sin(angle)
+    local dx = px - cx
+    local dy = py - cy
+    
+    return cx + dx * cos_a - dy * sin_a, cy + dx * sin_a + dy * cos_a
+end
+
+local function GetRotatedCorners(x, y, w, h, rotation)
+    local cx, cy = x + w/2, y + h/2
+    
+    local corners = {
+        {x, y},
+        {x + w, y},
+        {x + w, y + h},
+        {x, y + h}
+    }
+    
+    if rotation ~= 0 then
+        for i = 1, 4 do
+            corners[i][1], corners[i][2] = RotatePoint(corners[i][1], corners[i][2], cx, cy, rotation)
+        end
+    end
+    
+    return corners
+end
+
+local function PointInRotatedRect(px, py, x, y, w, h, rotation)
+    if rotation == 0 then
+        return px >= x and px <= x + w and py >= y and py <= y + h
+    end
+    
+    local corners = GetRotatedCorners(x, y, w, h, rotation)
+    
+    local function IsLeft(p0x, p0y, p1x, p1y, p2x, p2y)
+        return (p1x - p0x) * (p2y - p0y) - (p2x - p0x) * (p1y - p0y)
+    end
+    
+    local wn = 0
+    for i = 1, 4 do
+        local j = (i % 4) + 1
+        local c1 = corners[i]
+        local c2 = corners[j]
+        
+        if c1[2] <= py then
+            if c2[2] > py then
+                if IsLeft(c1[1], c1[2], c2[1], c2[2], px, py) > 0 then
+                    wn = wn + 1
+                end
+            end
+        else
+            if c2[2] <= py then
+                if IsLeft(c1[1], c1[2], c2[1], c2[2], px, py) < 0 then
+                    wn = wn - 1
+                end
+            end
+        end
+    end
+    
+    return wn ~= 0
+end
+
+local function RotatedRectOverlap(x1, y1, w1, h1, rot1, x2, y2, w2, h2, rot2)
+    if rot1 == 0 and rot2 == 0 then
+        return not (x1 + w1 < x2 or x2 + w2 < x1 or y1 + h1 < y2 or y2 + h2 < y1)
+    end
+    
+    local corners1 = GetRotatedCorners(x1, y1, w1, h1, rot1)
+    local corners2 = GetRotatedCorners(x2, y2, w2, h2, rot2)
+    
+    local axes = {}
+    
+    for i = 1, 4 do
+        local j = (i % 4) + 1
+        local dx = corners1[j][1] - corners1[i][1]
+        local dy = corners1[j][2] - corners1[i][2]
+        local length = math.sqrt(dx*dx + dy*dy)
+        if length > 0 then
+            table.insert(axes, {-dy/length, dx/length})
+        end
+    end
+    
+    for i = 1, 4 do
+        local j = (i % 4) + 1
+        local dx = corners2[j][1] - corners2[i][1]
+        local dy = corners2[j][2] - corners2[i][2]
+        local length = math.sqrt(dx*dx + dy*dy)
+        if length > 0 then
+            table.insert(axes, {-dy/length, dx/length})
+        end
+    end
+    
+    for _, axis in ipairs(axes) do
+        local min1, max1 = math.huge, -math.huge
+        local min2, max2 = math.huge, -math.huge
+        
+        for _, corner in ipairs(corners1) do
+            local projection = corner[1] * axis[1] + corner[2] * axis[2]
+            min1 = math.min(min1, projection)
+            max1 = math.max(max1, projection)
+        end
+        
+        for _, corner in ipairs(corners2) do
+            local projection = corner[1] * axis[1] + corner[2] * axis[2]
+            min2 = math.min(min2, projection)
+            max2 = math.max(max2, projection)
+        end
+        
+        if max1 < min2 or max2 < min1 then
+            return false
+        end
+    end
+    
+    return true
 end
 
 local function RectOverlap(x1, y1, w1, h1, x2, y2, w2, h2)
@@ -156,10 +274,17 @@ function module:GetItemsInBound(Position:UDim2, Size:UDim2, IgnoreList:{Instance
     local bw, bh = Size:ToAbsolute(love.graphics.getWidth(), love.graphics.getHeight())
 
     for _, inst in pairs(Drawables) do
-        if inst.Visible ~= false and not table.find(IgnoreList, inst) and inst.Parent ~= nil and inst.CanQuery ==  true then
-            local ix, iy, iw, ih = GetTruePosition(inst)
+        if inst.Visible ~= false and not table.find(IgnoreList, inst) and inst.Parent ~= nil and inst.CanQuery == true then
+            local ix, iy, iw, ih, irot = GetTruePosition(inst)
 
-            if RectOverlap(bx, by, bw, bh, ix, iy, iw, ih) then
+            local overlaps
+            if irot and irot ~= 0 then
+                overlaps = RotatedRectOverlap(bx, by, bw, bh, 0, ix, iy, iw, ih, irot)
+            else
+                overlaps = RectOverlap(bx, by, bw, bh, ix, iy, iw, ih)
+            end
+
+            if overlaps then
                 table.insert(results, inst)
             end
         end
@@ -167,9 +292,16 @@ function module:GetItemsInBound(Position:UDim2, Size:UDim2, IgnoreList:{Instance
 
     for _, inst in pairs(Instances) do
         if inst.Visible ~= false and not table.find(IgnoreList, inst) then
-            local ix, iy, iw, ih = GetTruePosition(inst)
+            local ix, iy, iw, ih, irot = GetTruePosition(inst)
 
-            if RectOverlap(bx, by, bw, bh, ix, iy, iw, ih) then
+            local overlaps
+            if irot and irot ~= 0 then
+                overlaps = RotatedRectOverlap(bx, by, bw, bh, 0, ix, iy, iw, ih, irot)
+            else
+                overlaps = RectOverlap(bx, by, bw, bh, ix, iy, iw, ih)
+            end
+
+            if overlaps then
                 table.insert(results, inst)
             end
         end
@@ -185,7 +317,7 @@ local function CheckCollisions(drawables)
 
     for i = 1, #drawables do
         local a = drawables[i]
-        local ax, ay, aw, ah = GetTruePosition(a)
+        local ax, ay, aw, ah, arot = GetTruePosition(a)
 
         if a.Visible ~= true or a.CanQuery == false or a.SinkInputs == false then
             continue
@@ -199,9 +331,16 @@ local function CheckCollisions(drawables)
             end
 
             if not b:IsDescendantOf(a) and not a:IsDescendantOf(b) then
-                local bx, by, bw, bh = GetTruePosition(b)
+                local bx, by, bw, bh, brot = GetTruePosition(b)
 
-                if RectOverlap(ax, ay, aw, ah, bx, by, bw, bh) then
+                local overlaps
+                if (arot and arot ~= 0) or (brot and brot ~= 0) then
+                    overlaps = RotatedRectOverlap(ax, ay, aw, ah, arot or 0, bx, by, bw, bh, brot or 0)
+                else
+                    overlaps = RectOverlap(ax, ay, aw, ah, bx, by, bw, bh)
+                end
+
+                if overlaps then
                     local key = tostring(a) .. "_" .. tostring(b)
                     newCollisions[key] = {a, b}
 
@@ -237,9 +376,16 @@ local function CheckMouseHover(drawables)
 
     for _, inst in ipairs(drawables) do
         if inst.Visible ~= false and inst.CanQuery == true and inst.SinkInputs == true then
-            local x, y, w, h = GetTruePosition(inst)
+            local x, y, w, h, rotation = GetTruePosition(inst)
 
-            if mx >= x and mx <= x + w and my >= y and my <= y + h then
+            local isInside
+            if rotation and rotation ~= 0 then
+                isInside = PointInRotatedRect(mx, my, x, y, w, h, rotation)
+            else
+                isInside = mx >= x and mx <= x + w and my >= y and my <= y + h
+            end
+
+            if isInside then
                 newHovered[inst] = true
 
                 if not hoveredInstances[inst] then

@@ -106,10 +106,12 @@ end)
 
 NewFrame.HoverBegan:Connect(function()
     Mouse:SetIcon(Enum.CursorTypes.Hand)
+     NewFrame.Color = NewFrame.Color:darken(0.2)
 end)
 
 NewFrame.HoverEnded:Connect(function()
     Mouse:SetIcon(Enum.CursorTypes.Arrow)
+    NewFrame.Color = Color4.new("#e81818")
 end)
 
 local TestFrame:Frame = NewFrame:Clone()

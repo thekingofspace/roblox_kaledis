@@ -6,13 +6,13 @@ export type Property = {
     Property: string,
     Type: string | {string},
     Value: any,
-    WriteTransform: ((self: any, OldValue: any) -> ...any)?,
-    ReadTransform: ((self: any, OldValue: any) -> any)?,
+    WriteTransform: ((self: Frame, OldValue: any) -> ...any)?,
+    ReadTransform: ((self: Frame, OldValue: any) -> any)?,
 }
 
 export type Method = {
     Method: string,
-    Code: (self: any, ...any) -> ...any,
+    Code: (self: Frame, ...any) -> ...any,
 }
 
 function module.new(InstanceUpdate: Signal, GetID: () -> string, UserInput)
@@ -37,7 +37,7 @@ function module.new(InstanceUpdate: Signal, GetID: () -> string, UserInput)
 
         table.insert(ExtendedMethods, {
             Method = "Draw",
-            Code = function(self)
+            Code = function(self:Frame)
                 if not self.Visible or self.Parent == nil then
                     return
                 end
