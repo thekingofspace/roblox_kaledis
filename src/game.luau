@@ -518,18 +518,14 @@ function module:GetType(I:Instance?)
     end
 end
 
--- Helper function for ray-rectangle intersection
 function RayRectIntersect(rayX, rayY, dirX, dirY, rectX, rectY, rectW, rectH, rotation, maxDist)
     if rotation == 0 then
-        -- Axis-aligned rectangle intersection (faster)
         return RayAABBIntersect(rayX, rayY, dirX, dirY, rectX, rectY, rectW, rectH, maxDist)
     else
-        -- Rotated rectangle intersection
         return RayOBBIntersect(rayX, rayY, dirX, dirY, rectX, rectY, rectW, rectH, rotation, maxDist)
     end
 end
 
--- Ray vs Axis-Aligned Bounding Box intersection
 function RayAABBIntersect(rayX, rayY, dirX, dirY, rectX, rectY, rectW, rectH, maxDist)
     local minX, maxX = rectX, rectX + rectW
     local minY, maxY = rectY, rectY + rectH
@@ -563,7 +559,6 @@ function RayAABBIntersect(rayX, rayY, dirX, dirY, rectX, rectY, rectW, rectH, ma
     local hitX = rayX + dirX * t
     local hitY = rayY + dirY * t
     
-    -- Calculate normal
     local normal = {x = 0, y = 0}
     local centerX, centerY = rectX + rectW/2, rectY + rectH/2
     local relX, relY = hitX - centerX, hitY - centerY
